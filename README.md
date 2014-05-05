@@ -3,9 +3,13 @@ Handbid-Connect
 
 Drop a snazzy "connect to handbid" button on your pages.
 
-## Step 1 - Drop in js loader
+## Step 1 - Drop in js loader and your config
 
 ```js
+window.hbConfig = {
+    appId: "{{app-id}}"
+};
+
 (function(d, s, id) {
     var js, fjs = d.getElementsByTagName(s)[0];
     if (d.getElementById(id)) return;
@@ -20,5 +24,5 @@ Drop a snazzy "connect to handbid" button on your pages.
 You can use any element you want, just give it a data-hb-connect="true" attribute.
 
 ```html
-<a href="/redirect/destination" data-hb-connect="true">Connect to Handbid</a>
+<a href="#" data-hb-redirect="http://mywebsite.com/results" data-hb-connect="true">Connect to Handbid</a>
 ```

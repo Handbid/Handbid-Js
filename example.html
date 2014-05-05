@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>handbid connect example</title>
+</head>
+<body>
+
+<p>Hello world! You should connect now!!!</p>
+<a href="#"
+   data-hb-connect="true"
+   data-hb-redirect="http://wordpress.handbid.com">Connect to Handbid</a>
+
+<!-- Handbid loader script -->
+<script>
+
+    window.hbConfig = {
+        appId: '535a07b72d7f3897098aca1c'
+    };
+
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "http://hbs.local/local/vendor/Handbid/Module/Apps/public/js/connect.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'hb-jssdk'));
+
+</script>
+
+</body>
+</html>
