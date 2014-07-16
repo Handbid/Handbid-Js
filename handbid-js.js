@@ -80,7 +80,7 @@
         addScript = null,
         Class,
         defaultOptions = { //default options the Handbid client will receive on instantiation
-            dependencies: isBrowser ? ['http://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', 'http://handbid-js.local/lib/Socket.io.js'] : [],
+            dependencies: isBrowser ? ['//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', 'http://handbid-js.local/lib/items.js', 'http://handbid-js.local/lib/Socket.io.js'] : [],
             url:          'http://handbid-js.local:6789' //where we connect by default
         };
 
@@ -193,7 +193,7 @@
             this._auctionSocket = _options.auctionSocket;
 
 
-            this.options = options;
+            this.options = _options;
 
             this.inherited();
 
@@ -408,7 +408,7 @@
 
             if (!this.connected) {
 
-                this._auctionOnLoad = { key: auctionKey, options: options };
+                this._auctionOnLoad = { key: auctionKey, options: _options };
 
             } else {
 
@@ -442,6 +442,17 @@
          */
         onDidUpdateItem: function (e) {
             this.log('item update', data);
+        },
+
+        auction: function () {
+
+            var auction = this._auction || {},
+                socket = this.auctionSocket();
+
+            auction.on  = socket.on.bind(socket);
+
+            return auction;
+
         },
 
         /**
@@ -494,7 +505,7 @@
                 this._auction = auction;
 
                 this.emit('did-connect-to-auction', {
-                    auction: auction,
+                    auction: this.auction(),
                     handbid: this
                 })
 
