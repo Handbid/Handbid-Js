@@ -32,7 +32,7 @@ Here are some code samples to get you started!
     handbid.connectToAuction('handbid-demo-auction');
     handbid.on('did-connect-to-auction', function (e) {
 
-        var auction = e.get('auction);
+        var auction = e.get('auction');
 
         auction.on('did-update-item', function (e) {
 
