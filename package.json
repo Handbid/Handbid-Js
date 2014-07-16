@@ -1,0 +1,8 @@
+{
+    "name":         "handbid-js",
+    "description":  "Connect to the handbid system to listen into events taking place in an auction.",
+    "dependencies": {
+        "socket.io-client": "0.9.17",
+        "chai":             "*"
+    }
+}
