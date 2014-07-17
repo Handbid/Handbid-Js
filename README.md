@@ -6,10 +6,11 @@ for my tests. To be honest, I've never run any unit tests in the browser, someon
 ##Lifecycle
 Connecting to an auction in Handbid is a multi-step process. It's pretty simple though, here is a breakdown:
 
+1. Include
 1. Instantiate new Handbid instance: `var hb = new Handbid()`
-1. Connect to the `main` server by invoking: `h.connect();`
-1. Connect to any auction by key by invoking: `h.connectToAuction('any-auction-key');`
-1. Listen for auction connection: `h.on('did-connect-to-auction', function (e) { console.log(e.get('auction')); });`
+1. Connect to the `main` server by invoking: `hb.connect();`
+1. Connect to any auction by key by invoking: `hb.connectToAuction('any-auction-key');`
+1. Listen for auction connection: `hb.on('did-connect-to-auction', function (e) { console.log(e.get('auction')); });`
 
 You can invoke `connectToAuction()` immediately after `connect()` (you don't have to wait for the main connection to be established).
 
@@ -39,7 +40,7 @@ Here are some code samples to get you started!
             var itemKey = e.get('key'),
                 changes = e.get('changes');
 
-            console.log('the following was changed:', changes,' on item with key:', itemKey);
+            console.log('the following was changed:', changes,'on item with key:', itemKey);
 
         });
 
@@ -67,12 +68,15 @@ var Handbid = require('handbid'),
     hb      = new Handbid();
 
 hb.connect();
-hb.connectToAuction();
+hb.connectToAuction('auction key');
 
-
+//from this point it's exactly the same as the browser.
 
 
 ```
 
 ##Events
 
+`Handbid`
+    #did-connect-to-server
+    #did-connect-to-auction
