@@ -246,6 +246,7 @@
             }
 
             this.options = options;
+            this._url = this.options.url;
 
             if (!this._serverSocket) {
 

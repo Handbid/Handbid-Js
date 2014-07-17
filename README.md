@@ -70,7 +70,7 @@ var Handbid = require('handbid'),
 hb.connect();
 hb.connectToAuction('auction key');
 
-//from this point it's exactly the same as the browser.
+//from this point it's exactly the same as the browser examples.
 
 
 ```
@@ -78,5 +78,9 @@ hb.connectToAuction('auction key');
 ##Events
 
 `Handbid`
-    #did-connect-to-server
-    #did-connect-to-auction
+-`did-connect-to-server`: When a server connection is made after invoking `hb.connect()`
+-- `handbid`: instance that dispatched the event
+-- `url`: the url we connected to
+
+-`did-connect-to-auction`: Dispatched after `hb.connectToAuction('auction-key')`
+-`error` :
