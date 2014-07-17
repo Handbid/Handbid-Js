@@ -28,6 +28,9 @@ Here are some code samples to get you started!
      *
      * window.handbid = new Handbid();
      * window.handbid.connect();
+     *
+     * So, automatically, you will be connected to the main Handbid server. But, you will not be able to listen in on any
+     * fancy update events. For
      */
     handbid.connectToAuction('handbid-demo-auction');
     handbid.on('did-connect-to-auction', function (e) {
@@ -39,7 +42,7 @@ Here are some code samples to get you started!
             var itemKey = e.get('key'),
                 changes = e.get('changes');
 
-            console.log('the following was changed:', changes,'on item with key:', itemKey);
+            console.log('the following was changed:', changes, 'on item with key:', itemKey);
 
         });
 
@@ -75,12 +78,17 @@ hb.connectToAuction('auction key');
 ```
 
 ##Events
+Under each event name is a description of the data passed with the event. This event is the single object passed to a
+listener of any event.
 
 `Handbid`
 
--`did-connect-to-server`: when a server connection is made after invoking `hb.connect()`
--- `handbid`: instance that dispatched the event
--- `url`: the url we connected to
-
--`did-connect-to-auction`: dispatched after `hb.connectToAuction('auction-key')`
--`error`: anytime any error occurs
+- `did-connect-to-server`: when a server connection is made after invoking `hb.connect()`
+    - `handbid`: instance that dispatched the event
+    - `url`: the url we connected to
+- `did-connect-to-auction`: dispatched after `hb.connectToAuction('auction-key')`
+    - `handbid`: instance that dispatched the event
+    - `auction`: the auction we connected to
+- `did-receive-message`: whenever the current user gets a message
+    - `message`: text of message that was sent
+- `error`: anytime any error occurs
