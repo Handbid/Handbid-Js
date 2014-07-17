@@ -6,7 +6,6 @@ for my tests. To be honest, I've never run any unit tests in the browser, someon
 ##Lifecycle
 Connecting to an auction in Handbid is a multi-step process. It's pretty simple though, here is a breakdown:
 
-1. Include
 1. Instantiate new Handbid instance: `var hb = new Handbid()`
 1. Connect to the `main` server by invoking: `hb.connect();`
 1. Connect to any auction by key by invoking: `hb.connectToAuction('any-auction-key');`
@@ -78,9 +77,10 @@ hb.connectToAuction('auction key');
 ##Events
 
 `Handbid`
--`did-connect-to-server`: When a server connection is made after invoking `hb.connect()`
+
+-`did-connect-to-server`: when a server connection is made after invoking `hb.connect()`
 -- `handbid`: instance that dispatched the event
 -- `url`: the url we connected to
 
--`did-connect-to-auction`: Dispatched after `hb.connectToAuction('auction-key')`
--`error` :
+-`did-connect-to-auction`: dispatched after `hb.connectToAuction('auction-key')`
+-`error`: anytime any error occurs
