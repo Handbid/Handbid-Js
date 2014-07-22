@@ -2,6 +2,12 @@ var Handbid     = require('../handbid-js'),
     expect      = require('chai').expect,
     endpoint    = 'http://localhost:6789',
     hb,
+    user        = {
+        firstName:  'Dummy',
+        lastName:   'User',
+        email:      'test@handbid.com',
+        cellPhone:  '720-253-5250'
+    },
     options     = {
         url: endpoint,
         'force new connection': true
@@ -56,7 +62,7 @@ describe('sdk', function () {
             hb.connect(clone(options));
 
             hb.on('did-connect-to-server', function (e) {
-                expect(e).to.have.property('handbid');
+                expect(e.data).to.have.property('handbid');
                 done()
             });
 
@@ -74,11 +80,11 @@ describe('sdk', function () {
             hb.connect(clone(options));
             hb.connectToAuction(auctionKey);
 
-            hb.on('did-connect-to-auction', function (data) {
+            hb.on('did-connect-to-auction', function (e) {
 
-                expect(data).to.have.property('auction');
-                expect(data.auction).to.have.property('key');
-                expect(hb.currentAuction()).to.have.property('key');
+                expect(e.data).to.have.property('auction');
+                expect(e.get('auction')).to.have.property('key');
+                expect(hb.auction()).to.have.property('key');
 
                 done();
 
@@ -98,7 +104,7 @@ describe('sdk', function () {
             hb.connect(clone(options));
             hb.connectToAuction(auctionKey);
 
-            hb.on('did-connect-to-auction', function (data) {
+            hb.on('did-connect-to-auction', function (e) {
 
                 hb.refreshItemPrices('*', function (prices) {
 
@@ -113,6 +119,22 @@ describe('sdk', function () {
                 done(err);
             });
 
+
+        });
+
+        it('should let me signup a bidder, yo', function (done) {
+
+            hb = new Handbid();
+            hb.connect(clone(options));
+            hb.on('did-connect-to-server', function (e) {
+
+                hb.signup(user, function (err, user) {
+
+                    console.log(err, user);
+
+                });
+
+            });
 
         });
 

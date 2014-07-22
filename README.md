@@ -81,6 +81,22 @@ hb.connectToAuction('auction key');
 Under each event name is a description of the data passed with the event. This event is the single object passed to a
 listener of any event.
 
+```js
+
+hb.on('did-connect-to-server', function (e) {
+
+    console.log(e.data); //will output everything in the event
+    console.log(e.get('url')); //use this rather than e.data.url because get() allows for a default value
+
+    if(e.get('anything', false)) {
+
+
+    }
+
+});
+
+```
+
 `Handbid`
 
 - `did-connect-to-server`: when a server connection is made after invoking `hb.connect()`
@@ -92,3 +108,6 @@ listener of any event.
 - `did-receive-message`: whenever the current user gets a message
     - `message`: text of message that was sent
 - `error`: anytime any error occurs
+
+##Handbid API
+- `

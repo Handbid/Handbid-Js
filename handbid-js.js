@@ -80,8 +80,8 @@
         addScript = null,
         Class,
         defaultOptions = { //default options the Handbid client will receive on instantiation
-            dependencies: isBrowser ? ['//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', 'http://handbid-js.local/lib/items.js', 'http://handbid-js.local/lib/Socket.io.js'] : [],
-            url:          'http://handbid-js.local:6789' //where we connect by default
+            dependencies: isBrowser ? ['//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', '//js.handbid.com/lib/items.js', '//js.handbid.com/lib/Socket.io.js'] : [],
+            url:          '//home.handbid.com:6789' //where we connect by default
         };
 
     //have we already been included?
@@ -128,6 +128,7 @@
 
     //Very Simple EventEmitter
     var EventEmitter = Class.extend({
+        Event:      null,
         _listeners: {},
 
         /**
@@ -158,13 +159,26 @@
             var listeners = this._listeners[event] || [],
                 i = 0,
                 cb,
+                e,
                 args = Array.prototype.slice.call(arguments);
 
             args.shift();
 
             for (i; i < listeners.length; i++) {
+
                 cb = listeners[i];
-                cb.apply(this, args);
+
+                if (this.Event) {
+
+                    e = new this.Event(event, more);
+                    cb.call(this, e);
+
+                } else {
+
+                    cb.apply(this, args);
+
+                }
+
             }
 
             return this;
@@ -245,7 +259,7 @@
                 _options.url = this._url;
             }
 
-            this.options = options;
+            this.options = _options;
             this._url = this.options.url;
 
             if (!this._serverSocket) {
@@ -263,6 +277,10 @@
                     this._serverSocket = new a({ io: _io});
                     this._auctionSocket = new a({ io: _io});
 
+                    this.Event = this._serverSocket.Event;
+
+                } else {
+                    throw new Error('Unable to load socket adapters.');
                 }
 
                 //server socket listeners
@@ -329,7 +347,7 @@
          * @param err
          */
         onServerError: function (err) {
-            this.emit('error', new Error(err.data));
+            this.emit('error', { error: new Error(err.data) });
             this.error('server error', arguments);
         },
 
@@ -339,7 +357,7 @@
          * @param err
          */
         onAuctionError: function (err) {
-            this.emit('error', new Error(err.data));
+            this.emit('error', { error: new Error(err.data) });
             this.error('auction error', arguments);
         },
 
@@ -384,7 +402,7 @@
          *
          * @returns {serverSocket|*}
          */
-        serverSocket:         function () {
+        serverSocket: function () {
             return this._serverSocket;
         },
 
@@ -436,29 +454,27 @@
             this.log('auction update', updates);
         },
 
-        /**
-         * An item was updated on the server
-         *
-         * @param e
-         */
-        onDidUpdateItem: function (e) {
-            this.log('item update', data);
-        },
 
+        /**
+         * Gets you the current auction.
+         *
+         * @returns {{}}
+         */
         auction: function () {
 
             var auction = this._auction || {},
                 socket = this.auctionSocket();
 
-            auction.on  = socket.on.bind(socket);
+            auction.on = socket.on.bind(socket);
 
             return auction;
 
         },
 
         /**
-         * Gets you
-         * @param cb
+         * Refresh the current auction.
+         *
+         * @param cb callback to be invoked after the refresh is done.
          */
         refreshAuction: function (cb) {
 
@@ -466,7 +482,7 @@
 
                 this._auction = auction;
 
-                if(cb) {
+                if (cb) {
                     cb(auction);
                 }
 
@@ -485,15 +501,6 @@
                 keys: itemKeys
             }, cb);
 
-        },
-
-        /**
-         * Returns your current auction if you are connected to one.
-         *
-         * @returns {*}
-         */
-        currentAuction: function () {
-            return this._auction;
         },
 
         /**
@@ -519,10 +526,21 @@
          * Drops in all the js scripts we've listed as dependencies above.
          */
         injectDependencies: function () {
+
             this._dependencies.forEach(function (dep) {
                 addScript(dep);
             }, this);
 
+        },
+
+        /**
+         * Sign up a user.
+         *
+         * @param values { firstName: 'Tay', lastName: 'Ro', etc...}
+         * @param cb should accept 2 params, error, user
+         */
+        signup: function (values, cb) {
+            this._serverSocket.emit('signup', values, cb);
         }
 
     });
