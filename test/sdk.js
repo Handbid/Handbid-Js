@@ -5,7 +5,7 @@ var Handbid     = require('../handbid-js'),
     user        = {
         firstName:  'Dummy',
         lastName:   'User',
-        email:      'test@handbid.com',
+        email:      'user@test.com',
         cellPhone:  '720-253-5250'
     },
     options     = {
