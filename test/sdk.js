@@ -1,6 +1,9 @@
 var Handbid     = require('../handbid-js'),
     expect      = require('chai').expect,
-    endpoint    = 'http://localhost:6789',
+    request     = require('request'),
+    domain      = 'http://orion.local',
+    endpoint    = domain + ':6789',
+
     hb,
     user        = {
         firstName:  'Dummy',
@@ -27,6 +30,13 @@ function clone(obj) {
 describe('sdk', function () {
 
     this.timeout(100000);
+
+    before(function (done) {
+        request.get( domain+'/v1/rest/handbid/clean-test-user-data', function( error, response, body ){
+            done();
+        });
+
+    });
 
     afterEach(function (done) {
 
@@ -130,7 +140,17 @@ describe('sdk', function () {
 
                 hb.signup(user, function (err, user) {
 
-                    console.log(err, user);
+                    if(err) {
+                        done(err);
+
+                    }else{
+                        expect(user).to.have.property('email').and.equal('user@test.com');
+
+                        done();
+
+                    }
+
+
 
                 });
 

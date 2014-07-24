@@ -540,7 +540,14 @@
          * @param cb should accept 2 params, error, user
          */
         signup: function (values, cb) {
-            this._serverSocket.emit('signup', values, cb);
+            this._serverSocket.emit('signup', values, function(err, user){
+                if(err) {
+                    err = new Error(err);
+                }
+
+                cb( err, user );
+
+            });
         }
 
     });
