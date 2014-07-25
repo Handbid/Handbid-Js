@@ -546,7 +546,7 @@
          */
         signupBidder: function (values, cb) {
 
-            this._serverSocket.emit('signup', values, function(err, user){
+            this._serverSocket.emit('signup-bidder', values, function(err, user){
                 if(err) {
                     err = new Error(err);
                 }
