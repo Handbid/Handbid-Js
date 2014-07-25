@@ -150,6 +150,11 @@ describe('sdk', function () {
                                 done( err );
                             }
 
+                            expect(user).to.have.property('_auth').to.have.property('autoLoginUserPhone').and.equal('7202535250');
+
+
+
+                            done('WE STILL NEED TO UPDATE THE USER!');
                         });
 
                     }
