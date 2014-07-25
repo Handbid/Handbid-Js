@@ -168,7 +168,12 @@
 
                 cb = listeners[i];
 
-                if (this.Event) {
+                //it was already an event
+                if(more instanceof this.Event) {
+
+                    cb.call(this, more);
+
+                } else if (this.Event) {
 
                     e = new this.Event(event, more);
                     cb.call(this, e);
@@ -347,7 +352,7 @@
          * @param err
          */
         onServerError: function (err) {
-            this.emit('error', { error: new Error(err.data) });
+            this.emit('error', err);
             this.error('server error', arguments);
         },
 
@@ -357,7 +362,7 @@
          * @param err
          */
         onAuctionError: function (err) {
-            this.emit('error', { error: new Error(err.data) });
+            this.emit('error', err);
             this.error('auction error', arguments);
         },
 
@@ -534,12 +539,12 @@
         },
 
         /**
-         * Sign up a user.
+         * Sign up a bidder.
          *
          * @param values { firstName: 'Tay', lastName: 'Ro', etc...}
          * @param cb should accept 2 params, error, user
          */
-        signup: function (values, cb) {
+        signupBidder: function (values, cb) {
             this._serverSocket.emit('signup', values, cb);
         }
 

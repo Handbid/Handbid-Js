@@ -5,7 +5,7 @@ var Handbid     = require('../handbid-js'),
     user        = {
         firstName:  'Dummy',
         lastName:   'User',
-        email:      'test@handbid.com',
+        email:      'test@test.com',
         cellPhone:  '720-253-5250'
     },
     options     = {
@@ -128,7 +128,7 @@ describe('sdk', function () {
             hb.connect(clone(options));
             hb.on('did-connect-to-server', function (e) {
 
-                hb.signup(user, function (err, user) {
+                hb.signupBidder(user, function (err, user) {
 
                     console.log(err, user);
 
