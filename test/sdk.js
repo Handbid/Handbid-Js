@@ -132,7 +132,7 @@ describe('sdk', function () {
 
         });
 
-        it('should let me signup a bidder, yo', function (done) {
+        it.only('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
@@ -146,7 +146,12 @@ describe('sdk', function () {
                     }else{
                         expect(user).to.have.property('email').and.equal('user@test.com');
 
-                        done();
+                        hb.setAuth( user.auth, function (err, user) {
+                            if( err ){
+                                done( err );
+                            }
+
+                        });
 
                     }
 

@@ -533,6 +533,20 @@
 
         },
 
+        setAuth: function (authString, cb) {
+            this._serverSocket.emit('authentication', authString, function(err, user){
+                if(err){
+                    err = new Error(err);
+                }
+
+
+
+                cb( err, user );
+
+            });
+
+        },
+
         /**
          * Sign up a user.
          *
