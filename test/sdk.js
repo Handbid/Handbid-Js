@@ -1,9 +1,6 @@
 var Handbid     = require('../handbid-js'),
     expect      = require('chai').expect,
-    request     = require('request'),
-    domain      = 'http://orion.local',
-    endpoint    = domain + ':6789',
-
+    endpoint    = 'http://localhost:6789',
     hb,
     user        = {
         firstName:  'Dummy',
@@ -138,7 +135,7 @@ describe('sdk', function () {
             hb.connect(clone(options));
             hb.on('did-connect-to-server', function (e) {
 
-                hb.signup(user, function (err, user) {
+                hb.signupBidder(user, function (err, user) {
 
                     if(err) {
                         done(err);

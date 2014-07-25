@@ -1,5 +1,13 @@
 (function () {
 
+
+    /* Simple JavaScript Inheritance
+     * By John Resig http://ejohn.org/
+     * MIT Licensed.
+     *
+     * Modified by Taylor Romero http://taylorrome.ro to conform more to
+     * internal conventions at Handbid http://handbid.com
+     */
     //gives us a Class.extend
     var init = function () {
         var initializing = false, fnTest = /xyz/.test(function () {
@@ -116,14 +124,6 @@
         }
     }
 
-    /* Simple JavaScript Inheritance
-     * By John Resig http://ejohn.org/
-     * MIT Licensed.
-     *
-     * Modified by Taylor Romero http://taylorrome.ro to conform more to
-     * internal conventions at Handbid http://handbid.com
-     */
-
     init();
 
     //Very Simple EventEmitter
@@ -168,7 +168,12 @@
 
                 cb = listeners[i];
 
-                if (this.Event) {
+                //it was already an event
+                if(more instanceof this.Event) {
+
+                    cb.call(this, more);
+
+                } else if (this.Event) {
 
                     e = new this.Event(event, more);
                     cb.call(this, e);
@@ -347,7 +352,7 @@
          * @param err
          */
         onServerError: function (err) {
-            this.emit('error', { error: new Error(err.data) });
+            this.emit('error', err);
             this.error('server error', arguments);
         },
 
@@ -357,7 +362,7 @@
          * @param err
          */
         onAuctionError: function (err) {
-            this.emit('error', { error: new Error(err.data) });
+            this.emit('error', err);
             this.error('auction error', arguments);
         },
 
@@ -553,8 +558,9 @@
          * @param values { firstName: 'Tay', lastName: 'Ro', etc...}
          * @param cb should accept 2 params, error, user
          */
-        signup: function (values, cb) {
-            this._serverSocket.emit('signup', values, function(err, user){
+        signupBidder: function (values, cb) {
+
+            this._serverSocket.emit('signup-bidder', values, function(err, user){
                 if(err) {
                     err = new Error(err);
                 }
