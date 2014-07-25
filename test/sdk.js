@@ -5,7 +5,7 @@ var Handbid     = require('../handbid-js'),
     user        = {
         firstName:  'Dummy',
         lastName:   'User',
-        email:      'test@test.com',
+        email:      'user@test.com',
         cellPhone:  '720-253-5250'
     },
     options     = {
@@ -27,6 +27,13 @@ function clone(obj) {
 describe('sdk', function () {
 
     this.timeout(100000);
+
+    before(function (done) {
+        request.get( domain+'/v1/rest/handbid/clean-test-user-data', function( error, response, body ){
+            done();
+        });
+
+    });
 
     afterEach(function (done) {
 
@@ -130,7 +137,17 @@ describe('sdk', function () {
 
                 hb.signupBidder(user, function (err, user) {
 
-                    console.log(err, user);
+                    if(err) {
+                        done(err);
+
+                    }else{
+                        expect(user).to.have.property('email').and.equal('user@test.com');
+
+                        done();
+
+                    }
+
+
 
                 });
 

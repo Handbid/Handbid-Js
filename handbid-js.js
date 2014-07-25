@@ -1,5 +1,13 @@
 (function () {
 
+
+    /* Simple JavaScript Inheritance
+     * By John Resig http://ejohn.org/
+     * MIT Licensed.
+     *
+     * Modified by Taylor Romero http://taylorrome.ro to conform more to
+     * internal conventions at Handbid http://handbid.com
+     */
     //gives us a Class.extend
     var init = function () {
         var initializing = false, fnTest = /xyz/.test(function () {
@@ -115,14 +123,6 @@
             }
         }
     }
-
-    /* Simple JavaScript Inheritance
-     * By John Resig http://ejohn.org/
-     * MIT Licensed.
-     *
-     * Modified by Taylor Romero http://taylorrome.ro to conform more to
-     * internal conventions at Handbid http://handbid.com
-     */
 
     init();
 
@@ -539,13 +539,21 @@
         },
 
         /**
-         * Sign up a bidder.
+         * Sign up a user.
          *
          * @param values { firstName: 'Tay', lastName: 'Ro', etc...}
          * @param cb should accept 2 params, error, user
          */
         signupBidder: function (values, cb) {
-            this._serverSocket.emit('signup', values, cb);
+
+            this._serverSocket.emit('signup', values, function(err, user){
+                if(err) {
+                    err = new Error(err);
+                }
+
+                cb( err, user );
+
+            });
         }
 
     });
