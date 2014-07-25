@@ -131,7 +131,7 @@ describe('sdk', function () {
 
         });
 
-        it('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
+        it.only('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
@@ -151,6 +151,15 @@ describe('sdk', function () {
                             }
 
                             expect(user).to.have.property('_auth').to.have.property('autoLoginUserPhone').and.equal('7202535250');
+
+//                            user.name = 'changedName';
+
+                           //hb.updateBidder(user, {
+                           //    'name': 'changedTestName'
+                           //}, function( err, user ){
+                           //    expect(user).to.have.property('name').and.equal('changedTestName');
+                            //
+                           //});
 
 
 

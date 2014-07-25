@@ -539,7 +539,20 @@
                     err = new Error(err);
                 }
 
-                cb( err, user );
+                cb(err, user);
+
+            });
+
+        },
+
+        updateBidder: function( user, data, cb ){
+            this._serverSocket.emit('update-bidder', user._id, data, user._auth['IronFrame'], function(err, user){
+
+                if(err){
+                    err = new Error(err);
+                }
+
+                cb(err, user);
 
             });
 
