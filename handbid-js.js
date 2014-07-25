@@ -1,17 +1,9 @@
 (function () {
 
-
-    /* Simple JavaScript Inheritance
-     * By John Resig http://ejohn.org/
-     * MIT Licensed.
-     *
-     * Modified by Taylor Romero http://taylorrome.ro to conform more to
-     * internal conventions at Handbid http://handbid.com
-     */
     //gives us a Class.extend
     var init = function () {
         var initializing = false, fnTest = /xyz/.test(function () {
-            xyz;
+            //xyz;
         }) ? /\b_super\b/ : /.*/;
 
         // The base Class implementation (does nothing)
@@ -122,7 +114,7 @@
                 func();
             }
         }
-    }
+    };
 
     init();
 
@@ -168,12 +160,7 @@
 
                 cb = listeners[i];
 
-                //it was already an event
-                if(more instanceof this.Event) {
-
-                    cb.call(this, more);
-
-                } else if (this.Event) {
+                if (this.Event) {
 
                     e = new this.Event(event, more);
                     cb.call(this, e);
@@ -381,7 +368,7 @@
          * @returns {*}
          */
         error: function () {
-            return console.log.error(console, arguments);
+            return console.log(console, arguments);
         },
 
         /**
@@ -558,8 +545,7 @@
          * @param values { firstName: 'Tay', lastName: 'Ro', etc...}
          * @param cb should accept 2 params, error, user
          */
-        signupBidder: function (values, cb) {
-
+        signup: function (values, cb) {
             this._serverSocket.emit('signup-bidder', values, function(err, user){
                 if(err) {
                     err = new Error(err);
