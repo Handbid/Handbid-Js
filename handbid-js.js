@@ -525,13 +525,19 @@
 
         },
 
+        /**
+         * Set an auth string to see if the user is valid
+         *
+         * @param authString
+         * @param cb
+         */
         setAuth: function (authString, cb) {
+
             this._serverSocket.emit('authentication', authString, function(err, user){
+
                 if(err){
                     err = new Error(err);
                 }
-
-
 
                 cb( err, user );
 
