@@ -1,6 +1,6 @@
 #Handbid-Js
 
-I am the `Handbid-Js` library. I work in both [nodejs](http://nodejs.org) && in the browser. I rely on [chai](http://chaijs.com)
+I am the `Handbid` library. I work in both [nodejs](http://nodejs.org) && in the browser. I rely on [chai](http://chaijs.com)
 for my tests. To be honest, I've never run any unit tests in the browser, someone should figure out how to do that. =)
 
 ##Lifecycle

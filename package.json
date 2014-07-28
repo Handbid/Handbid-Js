@@ -1,10 +1,34 @@
 {
-    "name":         "handbid-js",
-    "description":  "Connect to the handbid system to listen into events taking place in an auction.",
-    "version" : 0.0.1,
-    "dependencies": {
-        "socket.io-client": "0.9.17",
-        "chai":             "*",
-        "request":          "2.37.0"
-    }
+  "name": "handbid",
+  "version": "0.0.1",
+  "description": "Library to connect to an auction in Handbid.",
+  "main": "handbid.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^1.9.1",
+    "request": "^2.37.0",
+    "should": "^4.0.4",
+    "socket.io-client": "^0.9.17"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Handbid/Handbid-Js.git"
+  },
+  "keywords": [
+    "handbid",
+    "handbid Connect",
+    "Handbid JS"
+  ],
+  "author": "Handbid",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Handbid/Handbid-Js/issues"
+  },
+  "homepage": "https://github.com/Handbid/Handbid-Js"
 }
