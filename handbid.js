@@ -79,8 +79,8 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host        = '//handbid-js.local',
-        firebird    = '//handbid.local:6789',
+        host = '//handbid-js.local',
+        firebird = '//handbid.local:6789',
         cachebuster = 123456789, //for cdn and caching
         defaultOptions = { //default options the Handbid client will receive on instantiation
             dependencies: isBrowser ? ['//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', host + '/lib/items.js?cachebuster=' + cachebuster, host + '/lib/Socket.io.js?cachebuster=' + cachebuster] : [],
@@ -462,8 +462,19 @@
 
             auction.on = socket.on.bind(socket);
             auction.refreshItemPrices = this.refreshItemPrices.bind(this);
+            auction.bid = this.bid.bind(this);
 
             return auction;
+
+        },
+
+        bid: function (itemKey, amount, isProxy, callback) {
+
+            this.auctionSocket().emit('bid', {
+
+            }, function (err, results) {
+
+            });
 
         },
 
@@ -493,7 +504,7 @@
          */
         refreshItemPrices: function (itemKeys, cb) {
 
-            if(!this._auctionSocket.isConnected()) {
+            if (!this._auctionSocket.isConnected()) {
                 throw new Error('You must be connected to an auction to refresh item prices.');
             }
 
@@ -541,9 +552,9 @@
          */
         setAuth: function (authString, cb) {
 
-            this._serverSocket.emit('authentication', authString, function(err, user){
+            this._serverSocket.emit('authentication', authString, function (err, user) {
 
-                if(err){
+                if (err) {
                     err = new Error(err);
                 }
 
@@ -553,11 +564,11 @@
 
         },
 
-        updateBidder: function( user, data, cb ){
+        updateBidder: function (user, data, cb) {
 
-            this._serverSocket.emit('update-bidder', data, function(err, user){
+            this._serverSocket.emit('update-bidder', data, function (err, user) {
 
-                if(err){
+                if (err) {
                     err = new Error(err);
                 }
 
@@ -574,14 +585,33 @@
          * @param cb should accept 2 params, error, user
          */
         signup: function (values, cb) {
-            this._serverSocket.emit('signup-bidder', values, function(err, user){
-                if(err) {
+
+            this._serverSocket.emit('signup-bidder', values, function (err, user) {
+                if (err) {
                     err = new Error(err);
                 }
 
-                cb( err, user );
+                cb(err, user);
 
             });
+        },
+
+        login: function (email, password, cb) {
+
+            this._serverSocket.emit('login', {
+                email:    email,
+                password: password
+            }, function (err, user) {
+
+
+                if (err) {
+                    err = new Error(err);
+                }
+
+                cb(err, user);
+
+            });
+
         }
 
     });

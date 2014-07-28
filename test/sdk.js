@@ -1,26 +1,38 @@
-var Handbid     = require('../handbid-js'),
-    expect      = require('chai').expect,
-    request     = require('request'),
-    domain      = 'http://orion.local',
-    endpoint    = domain + ':6789',
+var Handbid = require('../handbid-js'),
+    expect = require('chai').expect,
+    request = require('request'),
+    domain = 'http://handbid.local',
+    endpoint = domain + ':6789',
     hb,
-    user        = {
-        firstName:  'Dummy',
-        lastName:   'User',
-        email:      'user@test.com',
-        cellPhone:  '720-253-5250'
+    user = {
+        firstName: 'Dummy',
+        lastName:  'User',
+        email:     'user@test.com',
+        cellPhone: '720-253-5250'
     },
-    options     = {
-        url: endpoint,
+    email = 'liquidg3@mac.com',
+    password = 'password',
+    options = {
+        url:                    endpoint,
         'force new connection': true
     },
-    auctionKey  = 'handbid-demo-auction';
+    auctionKey = 'handbid-demo-auction',
+    itemKey     = 'boquet-of-flowers';
+
+
 
 function clone(obj) {
-    if (null == obj || "object" != typeof obj) return obj;
-    var copy = obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+
+    "use strict";
+
+    if (null === obj || "object" !== typeof obj) {
+        return obj;
+    }
+    var copy = obj.constructor(), attr;
+    for (attr in obj) {
+        if (obj.hasOwnProperty(attr)) {
+            copy[attr] = obj[attr];
+        }
     }
     return copy;
 }
@@ -28,18 +40,23 @@ function clone(obj) {
 
 describe('sdk', function () {
 
+    "use strict";
+
     this.timeout(100000);
 
     before(function (done) {
-        request.get( domain+'/v1/rest/handbid/clean-test-user-data', function( error, response, body ){
+
+        request.get(domain + '/v1/rest/handbid/clean-test-user-data', function (error, response, body) {
+
             done();
+
         });
 
     });
 
     afterEach(function (done) {
 
-        if(hb) {
+        if (hb) {
             setTimeout(function () {
 
                 hb.disconnect(done);
@@ -72,7 +89,7 @@ describe('sdk', function () {
 
             hb.on('did-connect-to-server', function (e) {
                 expect(e.data).to.have.property('handbid');
-                done()
+                done();
             });
 
             hb.on('error', function (error) {
@@ -142,28 +159,32 @@ describe('sdk', function () {
 
                 hb.signup(user, function (err, user) {
 
-                    if(err) {
+                    if (err) {
                         done(err);
 
-                    }else{
+                    } else {
+
                         expect(user).to.have.property('email').and.equal('user@test.com');
 
-                        hb.setAuth( user.auth, function (err, user) {
-                            if( err ){
-                                done( err );
+                        hb.setAuth(user.auth, function (err, user) {
+
+                            if (err) {
+                                done(err);
                             }
 
                             expect(user).to.have.property('auth');//.to.have.property('autoLoginUserPhone').and.equal('7202535250');
 
                             //user.name = 'changedName';
 
-                           hb.updateBidder(user, {
-                               'email': 'newemail@test.com'
-                           }, function( err, user ){
-                               expect(user).to.have.property('email').and.equal('newemail@test.com');
+                            hb.updateBidder(user, {
+                                'email': 'newemail@test.com'
+                            }, function (err, user) {
 
-                               done();
-                           });
+                                expect(user).to.have.property('email').and.equal('newemail@test.com');
+
+                                done();
+
+                            });
 
 
                         });
@@ -171,6 +192,24 @@ describe('sdk', function () {
                     }
 
 
+                });
+
+            });
+
+        });
+
+
+        it.only('should allow me to bid on an item', function (done) {
+
+            hb = new Handbid();
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                hb.login(email, password, function (e) {
+
+                    console.log(e);
 
                 });
 
