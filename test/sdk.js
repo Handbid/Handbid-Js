@@ -133,10 +133,11 @@ describe('sdk', function () {
 
         });
 
-        it.only('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
+        it('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
+
             hb.on('did-connect-to-server', function (e) {
 
                 hb.signup(user, function (err, user) {
@@ -152,20 +153,19 @@ describe('sdk', function () {
                                 done( err );
                             }
 
-                            expect(user).to.have.property('_auth').to.have.property('autoLoginUserPhone').and.equal('7202535250');
+                            expect(user).to.have.property('auth');//.to.have.property('autoLoginUserPhone').and.equal('7202535250');
 
-//                            user.name = 'changedName';
+                            //user.name = 'changedName';
 
-                           //hb.updateBidder(user, {
-                           //    'name': 'changedTestName'
-                           //}, function( err, user ){
-                           //    expect(user).to.have.property('name').and.equal('changedTestName');
-                            //
-                           //});
+                           hb.updateBidder(user, {
+                               'email': 'newemail@test.com'
+                           }, function( err, user ){
+                               expect(user).to.have.property('email').and.equal('newemail@test.com');
+
+                               done();
+                           });
 
 
-
-                            done('WE STILL NEED TO UPDATE THE USER!');
                         });
 
                     }

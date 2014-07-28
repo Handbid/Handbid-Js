@@ -247,7 +247,7 @@
 
             var _options = options || {
                 url: this._url
-            }, a, _io;
+            }, adapter, _io;
 
             //ensure there is a URL in there
             if (!_options.url) {
@@ -260,17 +260,17 @@
             if (!this._serverSocket) {
 
                 if (isCommonJs) {
-                    a = require('./lib/Socket.io.js');
+                    adapter = require('./lib/Socket.io.js');
                     _io = require('socket.io-client');
                 } else if (window && window.altair && window.altair.socketAdapters) {
-                    a = window.altair.socketAdapters.socketio;
+                    adapter = window.altair.socketAdapters.socketio;
                     _io = io; //assume socket.io-client has been included by injectDependencies()
                 }
 
-                if (a) {
+                if (adapter) {
 
-                    this._serverSocket = new a({ io: _io});
-                    this._auctionSocket = new a({ io: _io});
+                    this._serverSocket = new adapter({ io: _io});
+                    this._auctionSocket = new adapter({ io: _io});
 
                     this.Event = this._serverSocket.Event;
 
@@ -554,7 +554,8 @@
         },
 
         updateBidder: function( user, data, cb ){
-            this._serverSocket.emit('update-bidder', user._id, data, user._auth['IronFrame'], function(err, user){
+
+            this._serverSocket.emit('update-bidder', data, function(err, user){
 
                 if(err){
                     err = new Error(err);
