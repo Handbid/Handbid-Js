@@ -115,7 +115,9 @@ describe('sdk', function () {
 
             hb.on('did-connect-to-auction', function (e) {
 
-                hb.refreshItemPrices('*', function (prices) {
+                var auction = e.get('auction');
+
+                auction.refreshItemPrices('*', function (prices) {
 
                     expect(Object.keys(prices).length).to.be.above(0);
                     done();

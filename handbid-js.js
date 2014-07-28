@@ -461,6 +461,7 @@
                 socket = this.auctionSocket();
 
             auction.on = socket.on.bind(socket);
+            auction.refreshItemPrices = this.refreshItemPrices.bind(this);
 
             return auction;
 
@@ -491,6 +492,10 @@
          * @param cb
          */
         refreshItemPrices: function (itemKeys, cb) {
+
+            if(!this._auctionSocket.isConnected()) {
+                throw new Error('You must be connected to an auction to refresh item prices.');
+            }
 
             this.auctionSocket().emit('item-prices', {
                 keys: itemKeys
