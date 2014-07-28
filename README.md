@@ -61,7 +61,7 @@ Here are some code samples to get you started!
 
 ###Nodejs
 ```bash
-$npm install handbid-js
+$npm install handbid
 ```
 
 ```js
