@@ -349,6 +349,7 @@
         /**
          * The auction socket had an error
          *
+         *
          * @param err
          */
         onAuctionError: function (err) {
@@ -596,13 +597,19 @@
             });
         },
 
+        /**
+         * Login already
+         *
+         * @param email
+         * @param password
+         * @param cb
+         */
         login: function (email, password, cb) {
 
             this._serverSocket.emit('login', {
                 email:    email,
                 password: password
             }, function (err, user) {
-
 
                 if (err) {
                     err = new Error(err);

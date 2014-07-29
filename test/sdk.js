@@ -1,7 +1,7 @@
-var Handbid = require('../handbid-js'),
+var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
-    domain = 'http://handbid.local',
+    domain = 'http://127.0.0.1',
     endpoint = domain + ':6789',
     hb,
     user = {
@@ -17,6 +17,11 @@ var Handbid = require('../handbid-js'),
         'force new connection': true
     },
     auctionKey = 'handbid-demo-auction',
+    onError = function (done) {
+        return function (e) {
+            done(e.get('error'));
+        };
+    },
     itemKey     = 'boquet-of-flowers';
 
 
@@ -86,14 +91,11 @@ describe('sdk', function () {
             hb = new Handbid();
 
             hb.connect(clone(options));
+            hb.on('error', done);
 
             hb.on('did-connect-to-server', function (e) {
                 expect(e.data).to.have.property('handbid');
                 done();
-            });
-
-            hb.on('error', function (error) {
-                done(error);
             });
 
 
@@ -105,6 +107,7 @@ describe('sdk', function () {
 
             hb.connect(clone(options));
             hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
 
             hb.on('did-connect-to-auction', function (e) {
 
@@ -116,11 +119,6 @@ describe('sdk', function () {
 
             });
 
-            hb.on('error', function (err) {
-                done(err);
-            });
-
-
         });
 
         it('should connect to auction and get item prices', function (done) {
@@ -129,6 +127,7 @@ describe('sdk', function () {
 
             hb.connect(clone(options));
             hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
 
             hb.on('did-connect-to-auction', function (e) {
 
@@ -143,17 +142,17 @@ describe('sdk', function () {
 
             });
 
-            hb.on('error', function (err) {
-                done(err);
-            });
+
 
 
         });
 
-        it('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
+        it.only('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
 
             hb.on('did-connect-to-server', function (e) {
 
@@ -170,6 +169,7 @@ describe('sdk', function () {
 
                             if (err) {
                                 done(err);
+                                return;
                             }
 
                             expect(user).to.have.property('auth');//.to.have.property('autoLoginUserPhone').and.equal('7202535250');
@@ -179,6 +179,11 @@ describe('sdk', function () {
                             hb.updateBidder(user, {
                                 'email': 'newemail@test.com'
                             }, function (err, user) {
+
+                                if (err) {
+                                    done(err);
+                                    return;
+                                }
 
                                 expect(user).to.have.property('email').and.equal('newemail@test.com');
 
@@ -199,17 +204,19 @@ describe('sdk', function () {
         });
 
 
-        it.only('should allow me to bid on an item', function (done) {
+        it('should allow me to bid on an item', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
             hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
 
             hb.on('did-connect-to-auction', function (e) {
 
-                hb.login(email, password, function (e) {
+                hb.login(email, password, function (error, user) {
 
-                    console.log(e);
+                    expect(user).to.have.property('email').and.equal('liquidg3@mac.com');
+                    done();
 
                 });
 
