@@ -206,10 +206,10 @@
         authenticated:  false,
         construct:      function (options) {
 
-            var _options        = options || {};
+            var _options        = merge(defaultOptions, options || {});
 
             //dependency injection
-            this._dependencies  = _options.dependencies || defaultOptions.dependencies; //if we want to change dependencies
+            this._dependencies  = _options.dependencies; //if we want to change dependencies
             this._socket        = _options.socket; //if we want to pass an already instantiated socket adapter
             this._io            = _options.io; //if we want to pass an instance of socket.io (the adapter has not loaded it)
 
