@@ -53,9 +53,18 @@ describe('sdk', function () {
 
         request.get(domain + '/v1/rest/handbid/clean-test-user-data', function (error, response, body) {
 
-            done();
+            //done();
+            request.get(domain + '/v1/rest/handbid/reset-auction-for-tests?query[auction]=' + auctionKey, function (error, response, body) {
+
+                done();
+
+            });
 
         });
+
+
+
+
 
     });
 
