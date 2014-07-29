@@ -2,6 +2,7 @@ var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
     domain = 'http://127.0.0.1',
+    domain = 'http://firebird.handbid.com',
     endpoint = domain + ':6789',
     legacyDomain = 'http://beta.handbid.com',
     hb,
@@ -84,7 +85,7 @@ describe('sdk', function () {
 
     });
 
-    
+
     describe('#handbid', function () {
 
         it('should allow instantiation', function () {
