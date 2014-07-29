@@ -131,7 +131,7 @@
     //Very Simple EventEmitter
     var EventEmitter = Class.extend({
         Event:      null,
-        _listeners: {},
+        _listeners: null,
 
         /**
          * Add a listener for any event by name
@@ -140,6 +140,10 @@
          * @param callback
          */
         on: function (event, callback) {
+
+            if(!this._listeners) {
+                this._listeners = {};
+            }
 
             if (!this._listeners[event]) {
                 this._listeners[event] = [];
@@ -199,6 +203,7 @@
         _io:            null,
         _Adapter:       null,
         auctions:       [],
+        authenticated:  false,
         construct:      function (options) {
 
             var _options        = options || {};
@@ -210,6 +215,9 @@
 
             //save our options for later
             this.options        = _options;
+
+            //default values
+            this.auctions = [];
 
             this.inherited();
 
@@ -380,15 +388,16 @@
 
             this.connected = true;
 
-            if (this._auctionOnLoad) {
-                this.connectToAuction(this._auctionOnLoad.key, this._auctionOnLoad.options);
-            }
-
             this.emit('did-connect-to-server', {
                 handbid: this,
                 options: this.options,
                 url:     this.options.url
             });
+
+            if (this._auctionOnLoad) {
+                this.connectToAuction(this._auctionOnLoad.key, this._auctionOnLoad.options);
+            }
+
 
         },
 
@@ -471,15 +480,49 @@
             this._socket.emit('authentication', authString, function (err, user) {
 
                 if (err) {
+
                     err = new Error(err);
+                    cb(err);
+
+                } else {
+
+                    this.authenticated = true;
+
+                    //set auth on every auction
+                    var i = 0,
+                        remaining = this.auctions.length,
+                        done = function () {
+
+                            remaining--;
+                            if(remaining <= 0) {
+                                cb(err, user);
+                            }
+
+                        };
+
+                    for (i; i < this.auctions.length; i++) {
+                        this.auctions[i].setAuth(authString, done);
+                    }
+
+                    if(remaining === 0) {
+                        done();
+                    }
+
                 }
 
-                cb(err, user);
 
-            });
+
+            }.bind(this));
 
         },
 
+        /**
+         * Update a bidder with new data (actually only works for the logged in bidder currently)
+         *
+         * @param user
+         * @param data
+         * @param cb
+         */
         updateBidder: function (user, data, cb) {
 
             this._socket.emit('update-bidder', data, function (err, user) {
@@ -551,9 +594,10 @@
      */
     var Auction = EventEmitter.extend({
 
-        options:    null,
-        _socket:    null,
-        values:     null,
+        options:        null,
+        _socket:        null,
+        values:         null,
+        authenticated:  false,
         construct: function (options) {
 
             this.options    = options;
@@ -579,6 +623,7 @@
                 this._socket.on('connect', this.onDidConnect.bind(this));
                 this._socket.on('error', this.onError.bind(this));
                 this._socket.on('did-update-auction', this.onDidUpdate.bind(this));
+                this._socket.on('did-update-item', this._eventPassthrough.bind(this));
 
             }
 
@@ -586,6 +631,15 @@
 
             return this._socket;
 
+        },
+
+        /**
+         * Pass an event from our socket through to anyone listening
+         * @param e
+         * @private
+         */
+        _eventPassthrough: function (e) {
+            this.emit(e.name, e.data);
         },
 
 
@@ -676,6 +730,20 @@
             } else {
                 cb();
             }
+        },
+
+        setAuth: function (authString, cb) {
+
+            this._socket.emit('authenticate', authString, function (err, user) {
+                if(err) {
+                    err = new Error(err);
+                }
+
+                this.authenticated = true;
+                cb(err, user);
+
+            }.bind(this));
+
         }
 
     });

@@ -16,10 +16,27 @@ You can invoke `connectToAuction()` immediately after `connect()` (you don't hav
 ##Examples
 Here are some code samples to get you started!
 
+###Nodejs
+```bash
+$npm install handbid
+```
+
+```js
+
+var Handbid = require('handbid'),
+    hb      = new Handbid();
+
+hb.connect();
+hb.connectToAuction('auction key');
+
+//from this point it's exactly the same as the browser examples.
+
+```
+
 ###Browser
 ```html
 
-<script type='text/javascript' src='http://handbid-js.local/handbid-js.js'></script>
+<script type='text/javascript' src='https://handbid-js-handbid.netdna-ssl.com/handbid.js'></script>
 
 <script type="text/javascript">
 
@@ -59,23 +76,8 @@ Here are some code samples to get you started!
 
 ```
 
-###Nodejs
-```bash
-$npm install handbid
-```
+###Authentication
 
-```js
-
-var Handbid = require('handbid'),
-    hb      = new Handbid();
-
-hb.connect();
-hb.connectToAuction('auction key');
-
-//from this point it's exactly the same as the browser examples.
-
-
-```
 
 ##Events
 Under each event name is a description of the data passed with the event. This event is the single object passed to a

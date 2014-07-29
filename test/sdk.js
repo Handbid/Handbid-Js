@@ -3,6 +3,7 @@ var Handbid = require('../handbid'),
     request = require('request'),
     domain = 'http://127.0.0.1',
     endpoint = domain + ':6789',
+    legacyDomain = 'http://beta.handbid.com',
     hb,
     user = {
         firstName: 'Dummy',
@@ -51,11 +52,20 @@ describe('sdk', function () {
 
     before(function (done) {
 
-        request.get(domain + '/v1/rest/handbid/clean-test-user-data', function (error, response, body) {
+        request.get(legacyDomain + '/v1/rest/handbid/clean-test-user-data', function (error, response, body) {
 
-            done();
+            //done();
+            request.get(legacyDomain + '/v1/rest/handbid/reset-auction-for-tests?query[auction]=' + auctionKey, function (error, response, body) {
+
+                done();
+
+            });
 
         });
+
+
+
+
 
     });
 
@@ -74,6 +84,7 @@ describe('sdk', function () {
 
     });
 
+    
     describe('#handbid', function () {
 
         it('should allow instantiation', function () {
@@ -141,16 +152,12 @@ describe('sdk', function () {
 
             });
 
-
-
-
         });
 
         it('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
-            hb.connectToAuction(auctionKey);
             hb.on('error', onError(done));
 
             hb.on('did-connect-to-server', function (e) {
@@ -173,6 +180,7 @@ describe('sdk', function () {
                             }
 
                             expect(user).to.have.property('auth');
+                            expect(hb.authenticated).to.equal(true);
 
                             hb.updateBidder(user, {
                                 'email': 'newemail@test.com'
@@ -194,7 +202,6 @@ describe('sdk', function () {
 
                     }
 
-
                 });
 
             });
@@ -202,19 +209,23 @@ describe('sdk', function () {
         });
 
 
-        it('should allow me to bid on an item', function (done) {
+        it('set auth on main connection also sets auth on auction.', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
             hb.connectToAuction(auctionKey);
             hb.on('error', onError(done));
 
-            hb.on('did-connect-to-auction', function (e) {
+            hb.on('did-connect-to-server', function (e) {
 
                 hb.login(email, password, function (error, user) {
 
-                    expect(user).to.have.property('email').and.equal('liquidg3@mac.com');
-                    done();
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        var auction = hb.auctions[0];
+                        expect(auction).to.have.property('authenticated').to.equal(true);
+                        done();
+                    });
 
                 });
 
