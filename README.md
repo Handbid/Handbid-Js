@@ -19,7 +19,7 @@ Here are some code samples to get you started!
 ###Browser
 ```html
 
-<script type='text/javascript' src='http://handbid-js.local/handbid-js.js'></script>
+<script type='text/javascript' src='https://handbid-js-handbid.netdna-ssl.com/handbid.js'></script>
 
 <script type="text/javascript">
 
