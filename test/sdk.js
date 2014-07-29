@@ -147,7 +147,7 @@ describe('sdk', function () {
 
         });
 
-        it.only('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
+        it('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
