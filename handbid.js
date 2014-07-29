@@ -162,6 +162,10 @@
          */
         emit: function (event, more) {
 
+            if(!this._listeners) {
+                this._listeners = {};
+            }
+
             var listeners = this._listeners[event] || [],
                 i = 0,
                 cb,
