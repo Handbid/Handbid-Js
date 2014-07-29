@@ -82,7 +82,7 @@ describe('sdk', function () {
                 url: endpoint
             });
 
-            expect(hb).to.have.property('_url', endpoint);
+            expect(hb).to.have.property('options').to.have.property('url').to.equal(endpoint);
 
         });
 
@@ -91,7 +91,7 @@ describe('sdk', function () {
             hb = new Handbid();
 
             hb.connect(clone(options));
-            hb.on('error', done);
+            hb.on('error', onError(done));
 
             hb.on('did-connect-to-server', function (e) {
                 expect(e.data).to.have.property('handbid');
@@ -112,8 +112,7 @@ describe('sdk', function () {
             hb.on('did-connect-to-auction', function (e) {
 
                 expect(e.data).to.have.property('auction');
-                expect(e.get('auction')).to.have.property('key');
-                expect(hb.auction()).to.have.property('key');
+                expect(e.get('auction').values).to.have.property('key');
 
                 done();
 
@@ -159,6 +158,7 @@ describe('sdk', function () {
                 hb.signup(user, function (err, user) {
 
                     if (err) {
+
                         done(err);
 
                     } else {
@@ -172,9 +172,7 @@ describe('sdk', function () {
                                 return;
                             }
 
-                            expect(user).to.have.property('auth');//.to.have.property('autoLoginUserPhone').and.equal('7202535250');
-
-                            //user.name = 'changedName';
+                            expect(user).to.have.property('auth');
 
                             hb.updateBidder(user, {
                                 'email': 'newemail@test.com'

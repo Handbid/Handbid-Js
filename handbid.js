@@ -74,6 +74,13 @@
 
     "use strict";
 
+    function merge(obj1,obj2){
+        var obj3 = {};
+        for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+        for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+        return obj3;
+    }
+
     //lazy environment checks
     var isCommonJs = !!(typeof module !== 'undefined' && module.exports),
         isBrowser = typeof window !== 'undefined',
@@ -187,22 +194,22 @@
     var Handbid = EventEmitter.extend({
 
         options:        null,
-        _auction:       null,
         _auctionOnLoad: null,
-        _url:           '',
         _dependencies:  null,
-        connected:      false,
+        _io:            null,
+        _Adapter:       null,
+        auctions:       [],
         construct:      function (options) {
 
-            var _options = options || {};
+            var _options        = options || {};
 
-            this._dependencies = _options.dependencies || defaultOptions.dependencies;
-            this._url = _options.url || defaultOptions.url;
-            this._serverSocket = _options.serverSocket;
-            this._auctionSocket = _options.auctionSocket;
+            //dependency injection
+            this._dependencies  = _options.dependencies || defaultOptions.dependencies; //if we want to change dependencies
+            this._socket        = _options.socket; //if we want to pass an already instantiated socket adapter
+            this._io            = _options.io; //if we want to pass an instance of socket.io (the adapter has not loaded it)
 
-
-            this.options = _options;
+            //save our options for later
+            this.options        = _options;
 
             this.inherited();
 
@@ -245,57 +252,50 @@
          */
         connect: function (options) {
 
-            var _options = options || {
-                url: this._url
-            }, adapter, _io;
-
-            //ensure there is a URL in there
-            if (!_options.url) {
-                _options.url = this._url;
-            }
+            var _options = merge(this.options, options || {}),
+                Adapter,
+                _io      = this._io;
 
             this.options = _options;
-            this._url = this.options.url;
 
-            if (!this._serverSocket) {
+            if (!this._socket) {
 
                 if (isCommonJs) {
-                    adapter = require('./lib/Socket.io.js');
-                    _io = require('socket.io-client');
+                    Adapter = require('./lib/Socket.io.js');
+                    _io = _io || require('socket.io-client');
                 } else if (window && window.altair && window.altair.socketAdapters) {
-                    adapter = window.altair.socketAdapters.socketio;
-                    _io = io; //assume socket.io-client has been included by injectDependencies()
+                    Adapter = window.altair.socketAdapters.socketio;
+                    _io = _io || io; //assume socket.io-client has been included by injectDependencies()
                 }
 
-                if (adapter) {
+                //make sure we always have a working copy of the io library and the adapter
+                this._io        = _io;
+                this._Adapter   = Adapter;
 
-                    this._serverSocket = new adapter({ io: _io});
-                    this._auctionSocket = new adapter({ io: _io});
+                //create a new adapter if we found a class
+                if (Adapter) {
 
-                    this.Event = this._serverSocket.Event;
+                    this._socket = new Adapter({ io: _io});
+                    this.Event = this._socket.Event;
 
                 } else {
                     throw new Error('Unable to load socket adapters.');
                 }
 
                 //server socket listeners
-                this._serverSocket.on('connect', this.onDidConnectToServer.bind(this));
-                this._serverSocket.on('error', this.onServerError.bind(this));
-
-                //auction socket listeners
-                this._auctionSocket.on('connect', this.onDidConnectToAuction.bind(this));
-                this._auctionSocket.on('error', this.onAuctionError.bind(this));
-                this._auctionSocket.on('did-update-auction', this.onDidUpdateAuction.bind(this));
+                this._socket.on('connect', this.onDidConnect.bind(this));
+                this._socket.on('error', this.onError.bind(this));
 
             }
 
-            if (!this._serverSocket) {
+            if (!this._socket) {
                 throw new Error('You must first include a socket.io library before you can connect');
             }
 
-            this._serverSocket.connect(_options);
+            //connect
+            this._socket.connect(_options);
 
-            return this._serverSocket;
+            return this._socket;
 
         },
 
@@ -307,54 +307,52 @@
         disconnect: function (cb) {
 
             var t = 0,
+                count = 0,
                 done = function () {
                     t--;
                     if (t === 0) {
                         if (cb) cb();
                     }
                 };
-            if (this._serverSocket) {
+
+            if (this._socket) {
                 t++;
             }
 
-            if (this._auctionSocket) {
-                t++;
-            }
+            //we have to close down all auctions
+            t = t + this.auctions.length;
 
             if (t === 0) {
                 if (cb) cb();
             } else {
 
-                if (this._serverSocket) {
-                    this._serverSocket.disconnect(done);
+                if (this._socket) {
+                    this._socket.disconnect(done);
                 }
 
-                if (this._auctionSocket) {
-                    this._auctionSocket.disconnect(done);
+                for (count = 0; count < this.auctions.length; count ++) {
+                    this.auctions[count].disconnect(done);
                 }
+
             }
 
         },
 
         /**
-         * An error occurred on the server socket.
+         * An error occurred on the socket.
          *
          * @param err
          */
-        onServerError: function (err) {
-            this.emit('error', err);
-            this.error('server error', arguments);
-        },
+        onError: function (err) {
 
-        /**
-         * The auction socket had an error
-         *
-         *
-         * @param err
-         */
-        onAuctionError: function (err) {
-            this.emit('error', err);
-            this.error('auction error', arguments);
+            if(typeof err === 'string') {
+                err = new Error(err);
+            } else if(err.data && typeof err.data === 'string') {
+                err = new Error(err.data);
+            }
+
+            this.emit('error', { error: err });
+            this.error('server error', arguments);
         },
 
         /**
@@ -372,13 +370,13 @@
          * @returns {*}
          */
         error: function () {
-            return console.log(console, arguments);
+            return console.log.apply(console, arguments);
         },
 
         /**
          * We just connected to the server
          */
-        onDidConnectToServer: function () {
+        onDidConnect: function () {
 
             this.connected = true;
 
@@ -388,7 +386,8 @@
 
             this.emit('did-connect-to-server', {
                 handbid: this,
-                url:     this._url
+                options: this.options,
+                url:     this.options.url
             });
 
         },
@@ -396,10 +395,10 @@
         /**
          * Access our server socket
          *
-         * @returns {serverSocket|*}
+         * @returns {socket|*}
          */
-        serverSocket: function () {
-            return this._serverSocket;
+        socket: function () {
+            return this._socket;
         },
 
         /**
@@ -419,119 +418,35 @@
          */
         connectToAuction: function (auctionKey, options) {
 
-            var _options = options || this.options;
+            var _options = merge(this.options, options || {});
 
-            if (!this.connected) {
+            if (!this._socket.isConnected()) {
 
                 this._auctionOnLoad = { key: auctionKey, options: _options };
 
             } else {
 
-                this._serverSocket.emit('connect-to-auction', {
+                this._socket.emit('connect-to-auction', {
                     auctionKey: auctionKey
                 }, function (response) {
 
-                    _options.url = response.url
+                    var __options = merge({
+                        io: this._io,
+                        Adapter: this._Adapter,
+                        Event: this.Event
+                    } ,merge(_options, response)),
+                        auction = new Auction(__options);
 
-                    this._auctionSocket.connect(_options);
+                    auction.connect();
+                    auction.on('did-connect', this.onDidConnectToAuction.bind(this));
+                    this.auctions.push(auction);
+
 
                 }.bind(this));
             }
 
         },
 
-        /**
-         * An auction was updated on the server
-         *
-         * @param e
-         */
-        onDidUpdateAuction: function (e) {
-            var updates = e.get('auction');
-            this.log('auction update', updates);
-        },
-
-
-        /**
-         * Gets you the current auction.
-         *
-         * @returns {{}}
-         */
-        auction: function () {
-
-            var auction = this._auction || {},
-                socket = this.auctionSocket();
-
-            auction.on = socket.on.bind(socket);
-            auction.refreshItemPrices = this.refreshItemPrices.bind(this);
-            auction.bid = this.bid.bind(this);
-
-            return auction;
-
-        },
-
-        bid: function (itemKey, amount, isProxy, callback) {
-
-            this.auctionSocket().emit('bid', {
-
-            }, function (err, results) {
-
-            });
-
-        },
-
-        /**
-         * Refresh the current auction.
-         *
-         * @param cb callback to be invoked after the refresh is done.
-         */
-        refreshAuction: function (cb) {
-
-            this.auctionSocket().emit('auction', null, function (auction) {
-
-                this._auction = auction;
-
-                if (cb) {
-                    cb(auction);
-                }
-
-            }.bind(this));
-        },
-
-        /**
-         * Refresh all item prices by keys (or * for all keys)
-         *
-         * @param itemKeys array of item keys OR a '*' for everything
-         * @param cb
-         */
-        refreshItemPrices: function (itemKeys, cb) {
-
-            if (!this._auctionSocket.isConnected()) {
-                throw new Error('You must be connected to an auction to refresh item prices.');
-            }
-
-            this.auctionSocket().emit('item-prices', {
-                keys: itemKeys
-            }, cb);
-
-        },
-
-        /**
-         * We have connected to an auction, lets get the latest details
-         */
-        onDidConnectToAuction: function () {
-
-            this.refreshAuction(function (auction) {
-
-                this._auction = auction;
-
-                this.emit('did-connect-to-auction', {
-                    auction: this.auction(),
-                    handbid: this
-                })
-
-            }.bind(this));
-
-        },
 
         /**
          *
@@ -553,7 +468,7 @@
          */
         setAuth: function (authString, cb) {
 
-            this._serverSocket.emit('authentication', authString, function (err, user) {
+            this._socket.emit('authentication', authString, function (err, user) {
 
                 if (err) {
                     err = new Error(err);
@@ -567,7 +482,7 @@
 
         updateBidder: function (user, data, cb) {
 
-            this._serverSocket.emit('update-bidder', data, function (err, user) {
+            this._socket.emit('update-bidder', data, function (err, user) {
 
                 if (err) {
                     err = new Error(err);
@@ -587,7 +502,7 @@
          */
         signup: function (values, cb) {
 
-            this._serverSocket.emit('signup-bidder', values, function (err, user) {
+            this._socket.emit('signup-bidder', values, function (err, user) {
                 if (err) {
                     err = new Error(err);
                 }
@@ -606,7 +521,7 @@
          */
         login: function (email, password, cb) {
 
-            this._serverSocket.emit('login', {
+            this._socket.emit('login', {
                 email:    email,
                 password: password
             }, function (err, user) {
@@ -619,9 +534,152 @@
 
             });
 
+        },
+
+        /**
+         * Make it easier to listen in to any connect-to-auction event
+         * @param e
+         */
+        onDidConnectToAuction: function (e) {
+            this.emit('did-connect-to-auction', e.data);
         }
 
     });
+
+    /**
+     * Auction interface
+     */
+    var Auction = EventEmitter.extend({
+
+        options:    null,
+        _socket:    null,
+        values:     null,
+        construct: function (options) {
+
+            this.options    = options;
+            this.Event      = options.Event;
+
+            if(!this.options.io || !this.options.Adapter || !this.options.Event || !this.options.url) {
+                throw new Error('You should probably not construct a new Auction manually.');
+            }
+
+            this.inherited();
+
+        },
+
+        connect: function (options) {
+
+            var _options = merge(this.options, options || {});
+
+            if(!this._socket) {
+
+                this._socket = new _options.Adapter({ io: _options.io });
+
+                //auction socket listeners
+                this._socket.on('connect', this.onDidConnect.bind(this));
+                this._socket.on('error', this.onError.bind(this));
+                this._socket.on('did-update-auction', this.onDidUpdate.bind(this));
+
+            }
+
+            this._socket.connect(_options);
+
+            return this._socket;
+
+        },
+
+
+        bid: function (itemKey, amount, isProxy, callback) {
+
+            this._socket.emit('bid', {
+
+            }, function (err, results) {
+
+            });
+
+        },
+
+        onDidUpdate: function (e) {
+
+            var updates = e.get('auction');
+
+            this.log('auction update', updates);
+
+        },
+
+        onError: function (err) {
+            this.emit('error', err);
+            this.error('server error', arguments);
+        },
+
+        get: function (name, defaultValue) {
+            return this.values[name] || defaultValue;
+        },
+
+        /**
+         * Refresh the current auction.
+         *
+         * @param cb callback to be invoked after the refresh is done.
+         */
+        refresh: function (cb) {
+
+            this._socket.emit('auction', null, function (values) {
+
+                this.values = values;
+
+                if (cb) {
+                    cb(this);
+                }
+
+            }.bind(this));
+        },
+
+        /**
+         * We have connected to an auction, lets get the latest details
+         */
+        onDidConnect: function () {
+
+            this.refresh(function (auction) {
+
+                this.emit('did-connect', {
+                    auction: this,
+                    handbid: this
+                })
+
+            }.bind(this));
+
+        },
+
+
+        /**
+         * Refresh all item prices by keys (or * for all keys)
+         *
+         * @param itemKeys array of item keys OR a '*' for everything
+         * @param cb
+         */
+        refreshItemPrices: function (itemKeys, cb) {
+
+            if (!this._socket.isConnected()) {
+                throw new Error('You must be connected to an auction to refresh item prices.');
+            }
+
+            this._socket.emit('item-prices', {
+                keys: itemKeys
+            }, cb);
+
+        },
+
+        disconnect: function (cb) {
+
+            if (this._socket) {
+                this._socket.disconnect(cb);
+            } else {
+                cb();
+            }
+        }
+
+    });
+
 
     //if we are in the browser, lets startup the sdk
     if (isBrowser) {
