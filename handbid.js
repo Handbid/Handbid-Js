@@ -87,7 +87,7 @@
         addScript = null,
         Class,
         host = '//handbid-js.local',
-        firebird = '//handbid.local:6789',
+        firebird = '//firebird.handbid.local:6789',
         cachebuster = 123456789, //for cdn and caching
         defaultOptions = { //default options the Handbid client will receive on instantiation
             dependencies: isBrowser ? ['//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', host + '/lib/items.js?cachebuster=' + cachebuster, host + '/lib/Socket.io.js?cachebuster=' + cachebuster] : [],
