@@ -3,8 +3,10 @@ var Handbid = require('../handbid'),
     request = require('request'),
     domain = 'http://127.0.0.1',
     domain = 'http://firebird.handbid.com',
+domain = 'http://orion.local',
     endpoint = domain + ':6789',
     legacyDomain = 'http://beta.handbid.com',
+legacyDomain = 'http://orion.local',
     hb,
     user = {
         firstName: 'Dummy',
@@ -55,7 +57,6 @@ describe('sdk', function () {
 
         request.get(legacyDomain + '/v1/rest/handbid/clean-test-user-data', function (error, response, body) {
 
-            //done();
             request.get(legacyDomain + '/v1/rest/handbid/reset-auction-for-tests?query[auction]=' + auctionKey, function (error, response, body) {
 
                 done();
@@ -226,6 +227,108 @@ describe('sdk', function () {
                         var auction = hb.auctions[0];
                         expect(auction).to.have.property('authenticated').to.equal(true);
                         done();
+                    });
+
+                });
+
+            });
+
+        });
+
+        it('should connect to auction and bid on an item', function (done) {
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                hb.login(email, password, function (error, user) {
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        var auction = e.get('auction');
+
+                        auction.bid(itemKey, 380.10, false, function (err, results) {
+
+                            if( err ){
+                                done(new Error(err));
+                            }
+
+                            expect(results).to.have.property('status').to.equal('winning');
+                            done();
+
+                        });
+
+                    });
+
+                });
+
+            });
+
+        });
+
+
+        it.only('should connect to auction and proxy bid on an item', function (done) {
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                hb.login(email, password, function (error, user) {
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        var auction = e.get('auction');
+
+                        auction.bid(itemKey, 400, true, function (err, results) {
+
+                            if( err ){
+                                done(new Error(err));
+                            }
+
+                            expect(results).to.have.property('status').to.equal('winning');
+                            done();
+
+                        });
+
+                    });
+
+                });
+
+            });
+
+        });
+
+
+        it('try to bid lower than item current bid (fail test)', function (done) {
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                hb.login(email, password, function (error, user) {
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        var auction = e.get('auction');
+
+                        auction.bid(itemKey, 100.10, false, function (err, results) {
+
+                            //@todo: expect err to be value not equal to undefined or null.
+
+                        });
+
                     });
 
                 });

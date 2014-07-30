@@ -650,9 +650,12 @@
         bid: function (itemKey, amount, isProxy, callback) {
 
             this._socket.emit('bid', {
-
+                itemKey: itemKey,
+                amount: amount,
+                isProxy: isProxy
             }, function (err, results) {
-
+                //we get back the results of our bid request here, process, and send it back to our caller.
+                callback(err, results);
             });
 
         },
