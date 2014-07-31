@@ -27,6 +27,8 @@ legacyDomain = 'http://orion.local',
         };
     },
     itemKey     = 'boquet-of-flowers';
+    itemStartingBid = 50;
+    itemBidIncrement = 10;
 
 
 
@@ -156,7 +158,36 @@ describe('sdk', function () {
 
         });
 
-        it('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
+
+        it('should connect to auction and get items', function (done) {
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                var auction = e.get('auction');
+
+                auction.items(function (err, items) {
+
+                    if(err) {
+                        done(err);
+                        return;
+                    }
+
+                    expect(items.length).to.be.above(0);
+                    done();
+
+                });
+
+            });
+
+        });
+
+        it('should let me signup a bidder, set authorization, then update that bidder', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
@@ -237,6 +268,7 @@ describe('sdk', function () {
 
         it('should connect to auction and bid on an item', function (done) {
 
+            var bidAmount = itemStartingBid + itemBidIncrement;
             hb = new Handbid();
 
             hb.connect(clone(options));
@@ -251,13 +283,15 @@ describe('sdk', function () {
 
                         var auction = e.get('auction');
 
-                        auction.bid(itemKey, 380.10, false, function (err, results) {
+                        auction.bid(itemKey, bidAmount , false, function (err, results) {
 
                             if( err ){
                                 done(new Error(err));
                             }
 
                             expect(results).to.have.property('status').to.equal('winning');
+                            expect(results).to.have.property('amount').to.equal(bidAmount);
+
                             done();
 
                         });
@@ -271,7 +305,8 @@ describe('sdk', function () {
         });
 
 
-        it.only('should connect to auction and proxy bid on an item', function (done) {
+        it('should connect to auction and proxy bid on an item', function (done) {
+            var bidAmount = itemStartingBid + itemBidIncrement;
 
             hb = new Handbid();
 
@@ -287,13 +322,15 @@ describe('sdk', function () {
 
                         var auction = e.get('auction');
 
-                        auction.bid(itemKey, 400, true, function (err, results) {
+                        auction.bid(itemKey, bidAmount, true, function (err, results) {
 
                             if( err ){
                                 done(new Error(err));
                             }
 
                             expect(results).to.have.property('status').to.equal('winning');
+                            expect(results).to.have.property('amount').to.equal(bidAmount);
+
                             done();
 
                         });
@@ -308,6 +345,7 @@ describe('sdk', function () {
 
 
         it('try to bid lower than item current bid (fail test)', function (done) {
+            var bidAmount = itemStartingBid + itemBidIncrement;
 
             hb = new Handbid();
 
@@ -323,9 +361,10 @@ describe('sdk', function () {
 
                         var auction = e.get('auction');
 
-                        auction.bid(itemKey, 100.10, false, function (err, results) {
+                        auction.bid(itemKey, itemStartingBid-10, false, function (err, results) {
 
-                            //@todo: expect err to be value not equal to undefined or null.
+                            expect(err.length).to.be.greaterThan(0);
+                            done();
 
                         });
 

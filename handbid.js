@@ -739,6 +739,21 @@
             }
         },
 
+
+        items: function (cb) {
+
+            this._socket.emit('items', function (err, items) {
+
+                if(err) {
+                    err = new Error(err);
+                }
+
+                cb(err, items);
+
+            });
+        },
+
+
         setAuth: function (authString, cb) {
 
             this._socket.emit('authenticate', authString, function (err, user) {
