@@ -433,7 +433,7 @@
 
             var _options = merge(this.options, options || {});
 
-            if (!this._socket.isConnected()) {
+            if (!this._socket || !this._socket.isConnected()) {
 
                 this._auctionOnLoad = { key: auctionKey, options: _options };
 
