@@ -67,10 +67,6 @@ describe('sdk', function () {
 
         });
 
-
-
-
-
     });
 
     afterEach(function (done) {
@@ -87,7 +83,6 @@ describe('sdk', function () {
         }
 
     });
-
 
     describe('#handbid', function () {
 

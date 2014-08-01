@@ -113,3 +113,13 @@ hb.on('did-connect-to-server', function (e) {
 
 ##Handbid API
 - `
+
+##Connect Button
+Throwing in a connect button is wicked easy!
+
+```html
+
+<a href="#" data-handbid-connect data-handbid-pass="/where/on/success" data-handbid-fail="/where/on/fail">
+    <img src="assets/btn-hb-blue-big.png" />
+</a>
+```
