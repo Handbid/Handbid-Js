@@ -356,7 +356,7 @@ describe('sdk', function () {
 
                         var auction = e.get('auction');
 
-                        auction.bid(itemKey, itemStartingBid-10, false, function (err, results) {
+                        auction.bid(itemKey, itemStartingBid - 10, false, function (err, results) {
 
                             expect(err.length).to.be.greaterThan(0);
                             done();

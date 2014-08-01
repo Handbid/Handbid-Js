@@ -87,10 +87,10 @@
         addScript = null,
         Class,
         host = '//handbid-js.local',
-        firebird = '//firebird.handbid.com:6789',
+        firebird = '//localhost:6789',
         cachebuster = 123456789, //for cdn and caching
         defaultOptions = { //default options the Handbid client will receive on instantiation
-            dependencies: isBrowser ? ['//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', host + '/lib/items.js?cachebuster=' + cachebuster, host + '/lib/Socket.io.js?cachebuster=' + cachebuster] : [],
+            dependencies: isBrowser ? ['//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', host + '/lib/items.js?cachebuster=' + cachebuster, host + '/lib/Socket.io.js?cachebuster=' + cachebuster, host + '/lib/connect.js?cachebuster=' + cachebuster, host + '/lib/profile.js?cachebuster=' + cachebuster] : [],
             url:          firebird //where we connect by default
         };
 
@@ -405,6 +405,10 @@
 
         },
 
+        isConnected: function () {
+            return this.connected;
+        },
+
         /**
          * Access our server socket
          *
@@ -486,7 +490,12 @@
                 if (err) {
 
                     err = new Error(err);
-                    cb(err);
+
+                    if(!cb) {
+                        console.error(err);
+                    } else {
+                        cb(err);
+                    }
 
                 } else {
 
@@ -498,7 +507,7 @@
                         done = function () {
 
                             remaining--;
-                            if(remaining <= 0) {
+                            if(remaining <= 0 && cb) {
                                 cb(err, user);
                             }
 
@@ -711,7 +720,6 @@
 
         },
 
-
         /**
          * Refresh all item prices by keys (or * for all keys)
          *
@@ -739,7 +747,6 @@
             }
         },
 
-
         items: function (cb) {
 
             this._socket.emit('items', function (err, items) {
@@ -753,16 +760,21 @@
             });
         },
 
-
         setAuth: function (authString, cb) {
 
             this._socket.emit('authenticate', authString, function (err, user) {
                 if(err) {
                     err = new Error(err);
+                    if(!cb) {
+                        console.error(err);
+                        return;
+                    }
                 }
 
                 this.authenticated = true;
-                cb(err, user);
+                if(cb) {
+                    cb(err, user);
+                }
 
             }.bind(this));
 
