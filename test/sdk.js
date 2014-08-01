@@ -3,8 +3,10 @@ var Handbid = require('../handbid'),
     request = require('request'),
     domain = 'http://127.0.0.1',
     domain = 'http://firebird.handbid.com',
+domain = 'http://orion.local',
     endpoint = domain + ':6789',
     legacyDomain = 'http://beta.handbid.com',
+legacyDomain = 'http://orion.local',
     hb,
     user = {
         firstName: 'Dummy',
@@ -25,6 +27,8 @@ var Handbid = require('../handbid'),
         };
     },
     itemKey     = 'boquet-of-flowers';
+    itemStartingBid = 50;
+    itemBidIncrement = 10;
 
 
 
@@ -55,7 +59,6 @@ describe('sdk', function () {
 
         request.get(legacyDomain + '/v1/rest/handbid/clean-test-user-data', function (error, response, body) {
 
-            //done();
             request.get(legacyDomain + '/v1/rest/handbid/reset-auction-for-tests?query[auction]=' + auctionKey, function (error, response, body) {
 
                 done();
@@ -63,10 +66,6 @@ describe('sdk', function () {
             });
 
         });
-
-
-
-
 
     });
 
@@ -84,7 +83,6 @@ describe('sdk', function () {
         }
 
     });
-
 
     describe('#handbid', function () {
 
@@ -155,7 +153,36 @@ describe('sdk', function () {
 
         });
 
-        it('should let me signup a bidder, set authorization, then update that bidder yo', function (done) {
+
+        it('should connect to auction and get items', function (done) {
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                var auction = e.get('auction');
+
+                auction.items(function (err, items) {
+
+                    if(err) {
+                        done(err);
+                        return;
+                    }
+
+                    expect(items.length).to.be.above(0);
+                    done();
+
+                });
+
+            });
+
+        });
+
+        it('should let me signup a bidder, set authorization, then update that bidder', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
@@ -226,6 +253,116 @@ describe('sdk', function () {
                         var auction = hb.auctions[0];
                         expect(auction).to.have.property('authenticated').to.equal(true);
                         done();
+                    });
+
+                });
+
+            });
+
+        });
+
+        it('should connect to auction and bid on an item', function (done) {
+
+            var bidAmount = itemStartingBid + itemBidIncrement;
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                hb.login(email, password, function (error, user) {
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        var auction = e.get('auction');
+
+                        auction.bid(itemKey, bidAmount , false, function (err, results) {
+
+                            if( err ){
+                                done(new Error(err));
+                            }
+
+                            expect(results).to.have.property('status').to.equal('winning');
+                            expect(results).to.have.property('amount').to.equal(bidAmount);
+
+                            done();
+
+                        });
+
+                    });
+
+                });
+
+            });
+
+        });
+
+
+        it('should connect to auction and proxy bid on an item', function (done) {
+            var bidAmount = itemStartingBid + itemBidIncrement;
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                hb.login(email, password, function (error, user) {
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        var auction = e.get('auction');
+
+                        auction.bid(itemKey, bidAmount, true, function (err, results) {
+
+                            if( err ){
+                                done(new Error(err));
+                            }
+
+                            expect(results).to.have.property('status').to.equal('winning');
+                            expect(results).to.have.property('amount').to.equal(bidAmount);
+
+                            done();
+
+                        });
+
+                    });
+
+                });
+
+            });
+
+        });
+
+
+        it('try to bid lower than item current bid (fail test)', function (done) {
+            var bidAmount = itemStartingBid + itemBidIncrement;
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                hb.login(email, password, function (error, user) {
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        var auction = e.get('auction');
+
+                        auction.bid(itemKey, itemStartingBid - 10, false, function (err, results) {
+
+                            expect(err.length).to.be.greaterThan(0);
+                            done();
+
+                        });
+
                     });
 
                 });
