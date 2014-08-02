@@ -387,7 +387,7 @@ describe('sdk', function () {
 
                         auction.purchase(purchasableItemKey, purchaseItemBuyItNowPrice, purchaseItemCount, function (err, result) {
 
-                            expect(result).to.have.property('pricePerItem').to.equal(4);
+                            expect(result).to.have.property('pricePerItem').to.equal(purchaseItemBuyItNowPrice);
 
                             done();
 
