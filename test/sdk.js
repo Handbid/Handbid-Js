@@ -17,7 +17,7 @@ legacyDomain = 'http://orion.local',
     email = 'liquidg3@mac.com',
     password = 'password',
     options = {
-        url:                    endpoint,
+        url: endpoint,
         'force new connection': true
     },
     auctionKey = 'handbid-demo-auction',
@@ -26,8 +26,11 @@ legacyDomain = 'http://orion.local',
             done(e.get('error'));
         };
     },
-    itemKey     = 'boquet-of-flowers';
-    itemStartingBid = 50;
+    itemKey     = 'boquet-of-flowers',
+    purchasableItemKey = 'drink-special',
+    purchaseItemCount = 1,
+    purchaseItemBuyItNowPrice = 4.00,
+    itemStartingBid = 50,
     itemBidIncrement = 10;
 
 
@@ -153,7 +156,6 @@ describe('sdk', function () {
 
         });
 
-
         it('should connect to auction and get items', function (done) {
 
             hb = new Handbid();
@@ -236,8 +238,7 @@ describe('sdk', function () {
 
         });
 
-
-        it('set auth on main connection also sets auth on auction.', function (done) {
+        it('should set auth on main connection and set auth on auction.', function (done) {
 
             hb = new Handbid();
             hb.connect(clone(options));
@@ -299,7 +300,6 @@ describe('sdk', function () {
 
         });
 
-
         it('should connect to auction and proxy bid on an item', function (done) {
             var bidAmount = itemStartingBid + itemBidIncrement;
 
@@ -338,8 +338,7 @@ describe('sdk', function () {
 
         });
 
-
-        it('try to bid lower than item current bid (fail test)', function (done) {
+        it('should try to bid lower than items current bid (fail test)', function (done) {
             var bidAmount = itemStartingBid + itemBidIncrement;
 
             hb = new Handbid();
@@ -359,6 +358,37 @@ describe('sdk', function () {
                         auction.bid(itemKey, itemStartingBid - 10, false, function (err, results) {
 
                             expect(err.length).to.be.greaterThan(0);
+                            done();
+
+                        });
+
+                    });
+
+                });
+
+            });
+
+        });
+
+        it('should make a direct purchase of an item in connected auction', function (done) {
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                hb.login (email, password, function (error, user) {
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        var auction = e.get('auction');
+
+                        auction.purchase(purchasableItemKey, purchaseItemBuyItNowPrice, purchaseItemCount, function (err, result) {
+
+                            expect(result).to.have.property('pricePerItem').to.equal(4);
+
                             done();
 
                         });

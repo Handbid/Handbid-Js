@@ -655,6 +655,19 @@
             this.emit(e.name, e.data);
         },
 
+        purchase: function (itemKey, amount, count, callback) {
+
+            this._socket.emit('purchase', {
+                itemKey: itemKey,
+                amount: amount,
+                count: count
+            }, function (err, results) {
+                //we get back the results of our purchase request here, process, and send it back to our caller.
+                //be aware, there are many ways this can fail-- we might try to purchase an item who's buy it now price has change, we might be trying to purchase an unpurchasable, or hidden item, we might be trying to buy an item that doesn't exist, we could be trying to buy an item from an auction that is not open, etc.
+                callback(err, results);
+            });
+
+        },
 
         bid: function (itemKey, amount, isProxy, callback) {
 
