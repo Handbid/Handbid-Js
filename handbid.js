@@ -355,16 +355,9 @@
          *
          * @param err
          */
-        onError: function (err) {
-
-            if(typeof err === 'string') {
-                err = new Error(err);
-            } else if(err.data && typeof err.data === 'string') {
-                err = new Error(err.data);
-            }
-
-            this.emit('error', { error: err });
-            this.error('server error', arguments);
+        onError: function (e) {
+            this.emit('error', e.data);
+            this.error('server error', e.get('error'));
         },
 
         /**
