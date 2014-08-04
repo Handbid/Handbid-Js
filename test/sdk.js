@@ -385,7 +385,7 @@ describe('sdk', function () {
 
                         var auction = e.get('auction');
 
-                        auction.purchase(purchasableItemKey, purchaseItemBuyItNowPrice, purchaseItemCount, function (err, result) {
+                        auction.purchase(purchasableItemKey, purchaseItemCount, purchaseItemBuyItNowPrice, function (err, result) {
 
                             expect(result).to.have.property('pricePerItem').to.equal(purchaseItemBuyItNowPrice);
 
