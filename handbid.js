@@ -512,7 +512,14 @@
                                 cb(err, user);
                             }
 
-                        };
+                            if(remaining <= 0) {
+                                this.emit('authenticated', {
+                                    user: user,
+                                    handbid: this
+                                });
+                            }
+
+                        }.bind(this);
 
                     for (i; i < this.auctions.length; i++) {
                         this.auctions[i].setAuth(authString, done);
