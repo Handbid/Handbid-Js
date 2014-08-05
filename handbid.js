@@ -90,7 +90,14 @@
         firebird = '//localhost:6789',
         cachebuster = 123456789, //for cdn and caching
         defaultOptions = { //default options the Handbid client will receive on instantiation
-            dependencies: isBrowser ? ['//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js', host + '/lib/items.js?cachebuster=' + cachebuster, host + '/lib/Socket.io.js?cachebuster=' + cachebuster, host + '/lib/connect.js?cachebuster=' + cachebuster, host + '/lib/profile.js?cachebuster=' + cachebuster] : [],
+            dependencies: isBrowser ? [
+                '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js',
+                host + '/lib/items.js?cachebuster=' + cachebuster,
+                host + '/lib/Socket.io.js?cachebuster=' + cachebuster,
+                host + '/lib/connect.js?cachebuster=' + cachebuster,
+                host + '/lib/profile.js?cachebuster=' + cachebuster,
+                host + '/lib/messaging.js?cachebuster=' + cachebuster
+            ] : [],
             url:          firebird //where we connect by default
         };
 
@@ -297,6 +304,7 @@
                 //server socket listeners
                 this._socket.on('connect', this.onDidConnect.bind(this));
                 this._socket.on('error', this.onError.bind(this));
+                this._socket.on('message', this._eventPassthrough.bind(this));
 
             }
 
@@ -398,6 +406,15 @@
 
         },
 
+        /**
+         * Pass an event from our socket through to anyone listening
+         * @param e
+         * @private
+         */
+        _eventPassthrough: function (e) {
+            this.emit(e.name, e.data);
+        },
+
         isConnected: function () {
             return this.connected;
         },
@@ -409,15 +426,6 @@
          */
         socket: function () {
             return this._socket;
-        },
-
-        /**
-         * Auction socket
-         *
-         * @returns {auctionSocket|*}
-         */
-        auctionSocket: function () {
-            return this._auctionSocket;
         },
 
         /**
