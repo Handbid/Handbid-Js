@@ -86,10 +86,13 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host        = '//handbid-js.local',
-        firebird    = '//localhost:6789',
-        cachebuster = 123456789, //for cdn and caching
-        defaultOptions = { //default options the Handbid client will receive on instantiation
+        host            = '//handbid-js.local',
+        firebird        = '//localhost:6789',
+        connectEndpoint = '//localhost:8080',
+        cachebuster     = 123456789, //for cdn and caching
+        defaultOptions  = { //default options the Handbid client will receive on instantiation
+            connectEndpoint: connectEndpoint, //where we point for connect.handbid
+            url:             firebird, //where we connect by default
             dependencies: isBrowser ? [
                 '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js',
                 host + '/lib/items.js?cachebuster=' + cachebuster,
@@ -98,8 +101,7 @@
                 host + '/lib/profile.js?cachebuster=' + cachebuster,
                 host + '/lib/messaging.js?cachebuster=' + cachebuster,
                 host + '/lib/bid.js?cachebuster=' + cachebuster
-            ] : [],
-            url:          firebird //where we connect by default
+            ] : []
         };
 
     //have we already been included?
@@ -216,14 +218,16 @@
         _Adapter:       null,
         auctions:       [],
         authenticated:  false,
+        connectEndpoint: null,
         construct:      function (options) {
 
             var _options        = merge(defaultOptions, options || {});
 
             //dependency injection
-            this._dependencies  = _options.dependencies; //if we want to change dependencies
-            this._socket        = _options.socket; //if we want to pass an already instantiated socket adapter
-            this._io            = _options.io; //if we want to pass an instance of socket.io (the adapter has not loaded it)
+            this._dependencies      = _options.dependencies; //if we want to change dependencies
+            this._socket            = _options.socket; //if we want to pass an already instantiated socket adapter
+            this._io                = _options.io; //if we want to pass an instance of socket.io (the adapter has not loaded it)
+            this.connectEndpoint    = _options.connectEndpoint;
 
             //save our options for later
             this.options        = _options;
@@ -417,7 +421,7 @@
         },
 
         isConnected: function () {
-            return this.connected;
+            return this._socket && this._socket.isConnected;
         },
 
         /**
@@ -775,6 +779,10 @@
             } else {
                 cb();
             }
+        },
+
+        isConnected: function () {
+            return this._socket && this._socket.isConnected;
         },
 
         items: function (cb) {
