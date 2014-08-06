@@ -421,7 +421,7 @@
         },
 
         isConnected: function () {
-            return this._socket && this._socket.isConnected;
+            return this._socket && this._socket.isConnected();
         },
 
         /**
@@ -794,7 +794,7 @@
         },
 
         isConnected: function () {
-            return this._socket && this._socket.isConnected;
+            return this._socket && this._socket.isConnected();
         },
 
         items: function (cb) {
