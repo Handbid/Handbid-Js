@@ -86,8 +86,8 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host = '//handbid-js.local',
-        firebird = '//localhost:6789',
+        host        = '//handbid-js.local',
+        firebird    = '//localhost:6789',
         cachebuster = 123456789, //for cdn and caching
         defaultOptions = { //default options the Handbid client will receive on instantiation
             dependencies: isBrowser ? [
@@ -96,7 +96,8 @@
                 host + '/lib/Socket.io.js?cachebuster=' + cachebuster,
                 host + '/lib/connect.js?cachebuster=' + cachebuster,
                 host + '/lib/profile.js?cachebuster=' + cachebuster,
-                host + '/lib/messaging.js?cachebuster=' + cachebuster
+                host + '/lib/messaging.js?cachebuster=' + cachebuster,
+                host + '/lib/bid.js?cachebuster=' + cachebuster
             ] : [],
             url:          firebird //where we connect by default
         };
@@ -513,10 +514,12 @@
                             }
 
                             if(remaining <= 0) {
+
                                 this.emit('authenticated', {
                                     user: user,
                                     handbid: this
                                 });
+
                             }
 
                         }.bind(this);
@@ -703,9 +706,15 @@
 
         onDidUpdate: function (e) {
 
-            var updates = e.get('auction');
+            var updates = e.get('changes');
 
-            this.log('auction update', updates);
+            Object.keys(updates).forEach(function (key) {
+                this.values[key] = updates[key];
+            });
+
+            this.emit('did-update-auction', {
+                auction: this
+            });
 
         },
 
@@ -789,6 +798,19 @@
                 }
 
                 cb(err, items);
+
+            });
+        },
+
+        item: function (key, cb) {
+
+            this._socket.emit('item-by-key', key, function (err, item) {
+
+                if(err) {
+                    err = new Error(err);
+                }
+
+                cb(err, item);
 
             });
         },
