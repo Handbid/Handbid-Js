@@ -690,6 +690,17 @@
 
         },
 
+        deleteProxyBid: function (proxyBidId, callback) {
+
+            this._socket.emit('delete-proxy-bid', {
+                id: proxyBidId
+            }, function (err, results) {
+
+                callback(err, results);
+            });
+
+        },
+
         onDidUpdate: function (e) {
 
             var updates = e.get('auction');
@@ -700,7 +711,8 @@
 
         onError: function (err) {
             this.emit('error', err);
-            this.error('server error', arguments);
+            console.log(err)
+            //this.error('server error', arguments);
         },
 
         get: function (name, defaultValue) {

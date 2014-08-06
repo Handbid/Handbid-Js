@@ -1,12 +1,11 @@
 var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
-    domain = 'http://127.0.0.1',
     domain = 'http://firebird.handbid.com',
-domain = 'http://orion.local',
+//domain = 'http://orion.local',
     endpoint = domain + ':6789',
     legacyDomain = 'http://beta.handbid.com',
-legacyDomain = 'http://orion.local',
+//legacyDomain = 'http://taysmacbookpro.local',
     hb,
     user = {
         firstName: 'Dummy',
@@ -300,7 +299,7 @@ describe('sdk', function () {
 
         });
 
-        it('should connect to auction and proxy bid on an item', function (done) {
+        it('should connect to auction and proxy bid on an item, then delete the proxy bid', function (done) {
             var bidAmount = itemStartingBid + itemBidIncrement;
 
             hb = new Handbid();
@@ -321,12 +320,23 @@ describe('sdk', function () {
 
                             if( err ){
                                 done(new Error(err));
+                                return;
                             }
 
                             expect(results).to.have.property('status').to.equal('winning');
                             expect(results).to.have.property('amount').to.equal(bidAmount);
 
-                            done();
+
+                            auction.deleteProxyBid( results.proxyBid, function (err, results) {
+                                if(err) {
+                                    done(new Error(err));
+                                }
+                                done();
+                            });
+
+
+
+                            //done();
 
                         });
 
