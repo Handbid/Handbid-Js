@@ -1,6 +1,6 @@
 {
   "name": "handbid",
-  "version": "0.0.69",
+  "version": "0.0.71",
   "description": "Library to connect to an auction in Handbid.",
   "main": "handbid.js",
   "directories": {

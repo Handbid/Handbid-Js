@@ -277,13 +277,11 @@
          */
         connect: function (options) {
 
-            this.options = merge(this.options, options);
+            this.options = merge(this.options, options || {});
 
             var _options = merge(options, {}),//make shallow copy because socket.io mutates options
                 Adapter,
                 _io      = this._io;
-
-            this.options = _options;
 
             if (!this._socket) {
 
