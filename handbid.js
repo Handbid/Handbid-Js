@@ -279,7 +279,7 @@
 
             this.options = merge(this.options, options || {});
 
-            var _options = merge(options, {}),//make shallow copy because socket.io mutates options
+            var _options = merge(this.options, {}),//make shallow copy because socket.io mutates options
                 Adapter,
                 _io      = this._io;
 
