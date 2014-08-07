@@ -86,10 +86,10 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host            = '//handbid-js.local',
-        firebird        = '//localhost:6789',
-        connectEndpoint = '//localhost:8080',
-        cachebuster     = 123456789, //for cdn and caching
+        host            = '//handbid-js.local', //where am i hosted and available to the planet?
+        firebird        = '//localhost:6789',   //where is the firebird and where do i connect to it
+        connectEndpoint = '//localhost:8080',//connect.handbid.com (where i send people to login/signup)
+        cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
         defaultOptions  = { //default options the Handbid client will receive on instantiation
             connectEndpoint: connectEndpoint, //where we point for connect.handbid
             url:             firebird, //where we connect by default
@@ -218,7 +218,8 @@
         _Adapter:       null,
         auctions:       [],
         authenticated:  false,
-        connectEndpoint: null,
+        connectEndpoint:null,
+        authString:     '',
         construct:      function (options) {
 
             var _options        = merge(defaultOptions, options || {});
@@ -612,6 +613,13 @@
          * @param e
          */
         onDidConnectToAuction: function (e) {
+
+            var auction = e.get('auction');
+
+            if(this.authenticated) {
+                auction.setAuth(this.authString);
+            }
+
             this.emit('did-connect-to-auction', e.data);
         }
 
@@ -626,6 +634,7 @@
         _socket:        null,
         values:         null,
         authenticated:  false,
+        authString:     '',
         construct: function (options) {
 
             this.options    = options;
@@ -826,15 +835,21 @@
         setAuth: function (authString, cb) {
 
             this._socket.emit('authenticate', authString, function (err, user) {
+
                 if(err) {
+
                     err = new Error(err);
+
                     if(!cb) {
                         console.error(err);
                         return;
                     }
+
+                } else {
+                    this.authString    = authString;
+                    this.authenticated = true;
                 }
 
-                this.authenticated = true;
                 if(cb) {
                     cb(err, user);
                 }
