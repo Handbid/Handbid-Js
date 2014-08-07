@@ -652,7 +652,7 @@
 
         connect: function (options) {
 
-            this.options = merge(this.options, options);
+            this.options = merge(this.options, options || {});
             var _options = merge(this.options, {}); // make a copy because socket.io mutates parameters
 
             if(!this._socket) {
