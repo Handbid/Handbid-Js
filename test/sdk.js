@@ -1,7 +1,7 @@
 var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
-    domain = 'http://firebird.handbid.com',
+    domain = 'http://beta.firebird.handbid.com',
 //domain = 'http://orion.local',
     endpoint = domain + ':6789',
     legacyDomain = 'http://beta.handbid.com',
@@ -212,7 +212,7 @@ describe('sdk', function () {
                             expect(hb.authenticated).to.equal(true);
 
                             hb.updateBidder(user, {
-                                'email': 'newemail@test.com'
+                                'firstName': 'renamed'
                             }, function (err, user) {
 
                                 if (err) {
@@ -220,7 +220,7 @@ describe('sdk', function () {
                                     return;
                                 }
 
-                                expect(user).to.have.property('email').and.equal('newemail@test.com');
+                                expect(user).to.have.property('firstName').and.equal('renamed');
 
                                 done();
 
@@ -278,9 +278,9 @@ describe('sdk', function () {
 
                         var auction = e.get('auction');
 
-                        auction.bid(itemKey, bidAmount , false, function (err, results) {
+                        auction.bid(itemKey, bidAmount, false, function (err, results) {
 
-                            if( err ){
+                            if (err) {
                                 done(new Error(err));
                             }
 
@@ -318,7 +318,7 @@ describe('sdk', function () {
 
                         auction.bid(itemKey, bidAmount, true, function (err, results) {
 
-                            if( err ){
+                            if (err) {
                                 done(new Error(err));
                                 return;
                             }
@@ -327,16 +327,14 @@ describe('sdk', function () {
                             expect(results).to.have.property('amount').to.equal(bidAmount);
 
 
-                            auction.deleteProxyBid( results.proxyBid, function (err, results) {
-                                if(err) {
+                            auction.deleteProxyBid(results.proxyBid, function (err, results) {
+                                if (err) {
                                     done(new Error(err));
                                 }
                                 done();
                             });
 
 
-
-                            //done();
 
                         });
 
@@ -389,7 +387,7 @@ describe('sdk', function () {
 
             hb.on('did-connect-to-auction', function (e) {
 
-                hb.login (email, password, function (error, user) {
+                hb.login(email, password, function (error, user) {
 
                     hb.setAuth(user.auth, function (err, user) {
 

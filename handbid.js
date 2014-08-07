@@ -277,7 +277,9 @@
          */
         connect: function (options) {
 
-            var _options = merge(this.options, options || {}),
+            this.options = merge(this.options, options);
+
+            var _options = merge(options, {}),//make shallow copy because socket.io mutates options
                 Adapter,
                 _io      = this._io;
 
@@ -365,13 +367,13 @@
         },
 
         /**
-         * An error occurred on the socket.
+         * An error occurred on the socket. Log it and pass it through
          *
          * @param err
          */
         onError: function (e) {
             this.emit('error', e.data);
-            this.error('server error', e.get('error'));
+            this.error('handbid.js error', e.get('error'), this.options);
         },
 
         /**
@@ -650,7 +652,8 @@
 
         connect: function (options) {
 
-            var _options = merge(this.options, options || {});
+            this.options = merge(this.options, options);
+            var _options = merge(this.options, {}); // make a copy because socket.io mutates parameters
 
             if(!this._socket) {
 
@@ -733,7 +736,7 @@
 
         onError: function (err) {
             this.emit('error', err);
-            console.log(err)
+            console.log('handbid.js auction error', err, this.options);
             //this.error('server error', arguments);
         },
 
