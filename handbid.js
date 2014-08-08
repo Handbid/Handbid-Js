@@ -88,7 +88,7 @@
         Class,
         host            = '//handbid-js.local', //where am i hosted and available to the planet?
         firebird        = '//localhost:6789',   //where is the firebird and where do i connect to it
-        connectEndpoint = '//localhost:8082',//connect.handbid.com (where i send people to login/signup)
+        connectEndpoint = '//localhost:8080',//connect.handbid.com (where i send people to login/signup)
         cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
         defaultOptions  = { //default options the Handbid client will receive on instantiation
             connectEndpoint: connectEndpoint, //where we point for connect.handbid
