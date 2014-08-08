@@ -506,7 +506,8 @@
 
                 } else {
 
-                    this.authenticated = true;
+                    this.authenticated  = true;
+                    this.authString     = authString;
 
                     //set auth on every auction
                     var i = 0,
