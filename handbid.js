@@ -100,7 +100,8 @@
                 host + '/lib/connect.js?cachebuster=' + cachebuster,
                 host + '/lib/profile.js?cachebuster=' + cachebuster,
                 host + '/lib/messaging.js?cachebuster=' + cachebuster,
-                host + '/lib/bid.js?cachebuster=' + cachebuster
+                host + '/lib/bid.js?cachebuster=' + cachebuster,
+                host + '/lib/health.js?cachebuster=' + cachebuster
             ] : []
         };
 
