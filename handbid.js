@@ -87,7 +87,7 @@
         addScript = null,
         Class,
         host            = '//handbid-js.local', //where am i hosted and available to the planet?
-        firebird        = '//localhost:6789',   //where is the firebird and where do i connect to it
+        firebird        = '//beta.firebird.handbid.com:6789',   //where is the firebird and where do i connect to it
         connectEndpoint = '//localhost:8080',   //connect.handbid.com (where i send people to login/signup)
         cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
         defaultOptions  = { //default options the Handbid client will receive on instantiation
@@ -217,7 +217,8 @@
         _dependencies:  null,
         _io:            null,
         _Adapter:       null,
-        auctions:       [],
+        auctions:       null,
+        auctionsByKey:  null,
         authenticated:  false,
         connectEndpoint:null,
         authString:     '',
@@ -236,6 +237,7 @@
 
             //default values
             this.auctions = [];
+            this.auctionsByKey = {};
 
             this.inherited();
 
@@ -407,7 +409,7 @@
             });
 
             if (this._auctionOnLoad) {
-                this.connectToAuction(this._auctionOnLoad.key, this._auctionOnLoad.options);
+                this.connectToAuction(this._auctionOnLoad.key, this._auctionOnLoad.options, this._auctionOnLoad.callback);
             }
 
 
@@ -441,13 +443,30 @@
          * @param auctionKey
          * @param options
          */
-        connectToAuction: function (auctionKey, options) {
+        connectToAuction: function (auctionKey, options, callback) {
 
-            var _options = merge(this.options, options || {});
+            var _options,
+                _callback = typeof options === 'function' ? options : callback;
+
+            if (typeof options === 'function') {
+                options = {};
+            }
+
+            _options = merge(this.options, options || {});
+
+            //cached auctions only trigger callback (not global did-connect)
+            if (this.auctionsByKey[auctionKey]) {
+
+                if(_callback) {
+                    _callback(null, this.auctionsByKey[auctionKey]);
+                }
+
+                return false;
+            }
 
             if (!this._socket || !this._socket.isConnected()) {
 
-                this._auctionOnLoad = { key: auctionKey, options: _options };
+                this._auctionOnLoad = { key: auctionKey, options: _options, callback: _callback };
 
             } else {
 
@@ -462,9 +481,11 @@
                     } ,merge(_options, response)),
                         auction = new Auction(__options);
 
-                    auction.connect();
+
                     auction.on('did-connect', this.onDidConnectToAuction.bind(this));
+                    auction.connect(_callback);
                     this.auctions.push(auction);
+                    this.auctionsByKey[auctionKey] = auction;
 
 
                 }.bind(this));
@@ -650,10 +671,20 @@
 
         },
 
-        connect: function (options) {
+        connect: function (options, callback) {
+
+            var _options,
+                _callback = (typeof options === 'function') ? options : callback;
+
+            if (typeof options === 'function') {
+                options = {};
+            }
+
 
             this.options = merge(this.options, options || {});
-            var _options = merge(this.options, {}); // make a copy because socket.io mutates parameters
+
+            _options = merge(this.options, {}); // make a copy because socket.io mutates parameters
+
 
             if(!this._socket) {
 
@@ -662,6 +693,13 @@
                 //auction socket listeners
                 this._socket.on('connect', this.onDidConnect.bind(this));
                 this._socket.on('error', this.onError.bind(this));
+
+                if (_callback) {
+                    this.on('did-connect', function (e) {
+                        _callback(null, e.get('auction'));
+                    });
+                }
+
                 this._socket.on('did-update-auction', this.onDidUpdate.bind(this));
                 this._socket.on('did-update-item', this._eventPassthrough.bind(this));
 

@@ -132,6 +132,31 @@ describe('sdk', function () {
 
         });
 
+        it('should connect to auction using callback', function (done) {
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.on('error', onError(done));
+
+            hb.connectToAuction(auctionKey, function (err, auction) {
+
+                expect(auction.values).to.have.property('key');
+                expect(hb.auctions).to.have.length(1);
+
+                hb.connectToAuction(auctionKey, function (err, auction) {
+
+                    expect(hb.auctions).to.have.length(1);
+                    expect(auction.values).to.have.property('key');
+
+                    done();
+
+                });
+
+            });
+
+        });
+
         it('should connect to auction and get item prices', function (done) {
 
             hb = new Handbid();
