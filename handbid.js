@@ -95,6 +95,7 @@
             url:             firebird, //where we connect by default
             dependencies: isBrowser ? [
                 '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js',
+                host + '/lib/browser.js?cachebuster=' + cachebuster,
                 host + '/lib/items.js?cachebuster=' + cachebuster,
                 host + '/lib/Socket.io.js?cachebuster=' + cachebuster,
                 host + '/lib/connect.js?cachebuster=' + cachebuster,
