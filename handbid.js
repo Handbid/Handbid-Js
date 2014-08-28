@@ -409,6 +409,12 @@
                 url:     this.options.url
             });
 
+            this.emit('connect', {
+                handbid: this,
+                options: this.options,
+                url:     this.options.url
+            });
+
             if (this._auctionOnLoad) {
                 this.connectToAuction(this._auctionOnLoad.key, this._auctionOnLoad.options, this._auctionOnLoad.callback);
             }
@@ -811,7 +817,12 @@
                 this.emit('did-connect', {
                     auction: this,
                     handbid: this
-                })
+                });
+
+                this.emit('connect', {
+                    auction: this,
+                    handbid: this
+                });
 
             }.bind(this));
 
