@@ -1,7 +1,7 @@
 var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
-    domain = 'http://beta.firebird.handbid.com',
+    domain = 'https://beta.firebird.handbid.com',
 //domain = 'http://orion.local',
     endpoint = domain + ':6789',
     legacyDomain = 'http://beta.handbid.com',
@@ -105,7 +105,7 @@ describe('sdk', function () {
             hb.connect(clone(options));
             hb.on('error', onError(done));
 
-            hb.on('did-connect-to-server', function (e) {
+            hb.on('connect', function (e) {
                 expect(e.data).to.have.property('handbid');
                 done();
             });
@@ -121,7 +121,7 @@ describe('sdk', function () {
             hb.connectToAuction(auctionKey);
             hb.on('error', onError(done));
 
-            hb.on('did-connect-to-auction', function (e) {
+            hb.on('connect', function (e) {
 
                 expect(e.data).to.have.property('auction');
                 expect(e.get('auction').values).to.have.property('key');
@@ -194,7 +194,7 @@ describe('sdk', function () {
 
                 auction.items(function (err, items) {
 
-                    if(err) {
+                    if (err) {
                         done(err);
                         return;
                     }
