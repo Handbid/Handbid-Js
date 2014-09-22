@@ -479,7 +479,12 @@
 
                 this._socket.emit('connect-to-auction', {
                     auctionKey: auctionKey
-                }, function (response) {
+                }, function (error, response) {
+
+                    if (error) {
+
+                        return _callback(error);
+                    }
 
                     var __options = merge({
                         io: this._io,
@@ -524,8 +529,6 @@
             this._socket.emit('authentication', authString, function (err, user) {
 
                 if (err) {
-
-                    err = new Error(err);
 
                     if(!cb) {
                         console.error(err);
@@ -586,11 +589,25 @@
 
             this._socket.emit('update-bidder', data, function (err, user) {
 
-                if (err) {
-                    err = new Error(err);
-                }
-
                 cb(err, user);
+
+            });
+
+        },
+
+        getUserAuctions: function (user, query, cb) {
+
+            var data = {
+                user: user,
+                query: {
+                    limit: query['limit'] || 10,
+                    skip:  query['skip']  || undefined
+                }
+            };
+
+            this._socket.emit('get-bidder-auctions', data, function (err, auctions) {
+
+                cb(err, auctions);
 
             });
 
