@@ -86,7 +86,7 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host            = 'http://taysmacbookpro.local', //where am i hosted and available to the planet?
+        host            = 'http://beta.js.handbid.com', //where am i hosted and available to the planet?
         firebird        = 'https://beta-firebird.hand.bid:6789',   //where is the firebird and where do i connect to it
         connectEndpoint = 'https://beta-connect.hand.bid:8082',   //connect.handbid.com (where i send people to login/signup)
         cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
@@ -747,7 +747,20 @@
             this.emit(e.name, e.data);
         },
 
+        /**
+         * Make a purchase of an item
+         *
+         * @param itemKey
+         * @param quantity
+         * @param amount
+         * @param callback
+         */
         purchase: function (itemKey, quantity, amount, callback) {
+
+            if(typeof amount === 'function') {
+                callback = amount;
+                amount = null;
+            }
 
             this._socket.emit('purchase', {
                 itemKey: itemKey,
