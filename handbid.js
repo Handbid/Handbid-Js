@@ -483,6 +483,7 @@
 
                     if (error) {
 
+                        console.error(error);
                         return _callback ? _callback(error) : null;
                     }
 
