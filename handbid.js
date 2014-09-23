@@ -483,7 +483,7 @@
 
                     if (error) {
 
-                        return _callback(error);
+                        return _callback ? _callback(error) : null;
                     }
 
                     var __options = merge({
