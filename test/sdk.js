@@ -1,16 +1,16 @@
 var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
-    domain = 'https://beta.firebird.handbid.com',
-//domain = 'http://orion.local',
+    //domain = 'https://beta.firebird.handbid.com',
+domain = 'http://orion.local',
     endpoint = domain + ':6789',
-    legacyDomain = 'http://beta.handbid.com',
-//legacyDomain = 'http://taysmacbookpro.local',
+//    legacyDomain = 'http://beta.handbid.com',
+legacyDomain = 'http://orion.local',
     hb,
     user = {
         firstName: 'Dummy',
         lastName:  'User',
-        email:     'user@test.com',
+        email:     'user25@test.com',
         cellPhone: '720-253-5250'
     },
     email = 'liquidg3@mac.com',
@@ -20,6 +20,8 @@ var Handbid = require('../handbid'),
         'force new connection': true
     },
     auctionKey = 'handbid-demo-auction',
+    badAuctionKey = 'handbid-demo-auction-bad',
+
     onError = function (done) {
         return function (e) {
             done(e.get('error'));
@@ -57,7 +59,7 @@ describe('sdk', function () {
 
     this.timeout(100000);
 
-    before(function (done) {
+    beforeEach(function (done) {
 
         request.get(legacyDomain + '/v1/rest/handbid/clean-test-user-data', function (error, response, body) {
 
@@ -121,7 +123,7 @@ describe('sdk', function () {
             hb.connectToAuction(auctionKey);
             hb.on('error', onError(done));
 
-            hb.on('connect', function (e) {
+            hb.on('did-connect-to-auction', function (e) {
 
                 expect(e.data).to.have.property('auction');
                 expect(e.get('auction').values).to.have.property('key');
@@ -144,10 +146,10 @@ describe('sdk', function () {
                 expect(auction.values).to.have.property('key');
                 expect(hb.auctions).to.have.length(1);
 
-                hb.connectToAuction(auctionKey, function (err, auction) {
+                hb.connectToAuction(badAuctionKey, function (err, auction) {
 
-                    expect(hb.auctions).to.have.length(1);
-                    expect(auction.values).to.have.property('key');
+                    expect(err.length).to.be.greaterThan(0);
+                    expect(auction).to.equal(undefined);
 
                     done();
 
@@ -224,12 +226,12 @@ describe('sdk', function () {
 
                     } else {
 
-                        expect(user).to.have.property('email').and.equal('user@test.com');
+                        expect(user).to.have.property('email').and.equal('user24@test.com');
 
                         hb.setAuth(user.auth, function (err, user) {
 
                             if (err) {
-                                done(err);
+                                done(new Error(err));
                                 return;
                             }
 
@@ -425,6 +427,34 @@ describe('sdk', function () {
                             done();
 
                         });
+
+                    });
+
+                });
+
+            });
+
+        });
+
+        it.only('should retrieve all auctions a user has participated in', function (done) {
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-auction', function (e) {
+
+                hb.login(email, password, function (error, user) {
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        hb.getUserAuctions(user, {limit: 5, skip: undefined}, function (auctions) {
+
+                            "stop";
+
+                        });
+
 
                     });
 
