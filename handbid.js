@@ -86,9 +86,9 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host            = '//js.hand.bid', //where am i hosted and available to the planet?
-        firebird        = '//firebird.hand.bid:6789',   //where is the firebird and where do i connect to it
-        connectEndpoint = '//connect.hand.bid:4433',   //connect.handbid.com (where i send people to login/signup)
+        host            = 'http://taysmacbookpro.local', //where am i hosted and available to the planet?
+        firebird        = 'https://beta-firebird.hand.bid:6789',   //where is the firebird and where do i connect to it
+        connectEndpoint = 'https://beta-connect.hand.bid:8082',   //connect.handbid.com (where i send people to login/signup)
         cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
         defaultOptions  = { //default options the Handbid client will receive on instantiation
             connectEndpoint: connectEndpoint, //where we point for connect.handbid
@@ -490,7 +490,10 @@
 
 
                     auction.on('did-connect', this.onDidConnectToAuction.bind(this));
-                    auction.connect(_callback);
+
+                    if(_callback) {
+                        auction.connect(_callback);
+                    }
                     this.auctions.push(auction);
                     this.auctionsByKey[auctionKey] = auction;
 
