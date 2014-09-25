@@ -497,9 +497,8 @@
 
                     auction.on('did-connect', this.onDidConnectToAuction.bind(this));
 
-                    if(_callback) {
-                        auction.connect(_callback);
-                    }
+                    auction.connect(_callback);
+
                     this.auctions.push(auction);
                     this.auctionsByKey[auctionKey] = auction;
 
