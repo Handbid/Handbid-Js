@@ -63,7 +63,7 @@ hb.connectToAuction('auction key');
 
         });
 
-        auction.on('did-update-auction', function (e) {
+        auction.on('did-update', function (e) {
 
             console.log(e);
 

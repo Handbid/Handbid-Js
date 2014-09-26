@@ -86,8 +86,8 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host            = 'http://beta.js.handbid.com', //where am i hosted and available to the planet?
-        firebird        = 'https://beta-firebird.hand.bid:6789',   //where is the firebird and where do i connect to it
+        host            = 'http://handbid-js.local', //where am i hosted and available to the planet?
+        firebird        = 'http://taysmacbookpro.local:6789',   //where is the firebird and where do i connect to it
         connectEndpoint = 'https://beta-connect.hand.bid:8082',   //connect.handbid.com (where i send people to login/signup)
         cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
         defaultOptions  = { //default options the Handbid client will receive on instantiation
@@ -102,7 +102,8 @@
                 host + '/lib/profile.js?cachebuster=' + cachebuster,
                 host + '/lib/messaging.js?cachebuster=' + cachebuster,
                 host + '/lib/bid.js?cachebuster=' + cachebuster,
-                host + '/lib/health.js?cachebuster=' + cachebuster
+                host + '/lib/health.js?cachebuster=' + cachebuster,
+                host + '/lib/timer.js?cachebuster=' + cachebuster
             ] : []
         };
 
@@ -806,8 +807,14 @@
                 this.values[key] = updates[key];
             });
 
-            this.emit('did-update-auction', {
-                auction: this
+            this.emit('did-update', {
+                auction: this,
+                changed: updates
+            });
+
+            this.emit('update', {
+                auction: this,
+                changed: updates
             });
 
         },
