@@ -805,7 +805,7 @@
 
             Object.keys(updates).forEach(function (key) {
                 this.values[key] = updates[key];
-            });
+            }, this);
 
             this.emit('did-update', {
                 auction: this,
