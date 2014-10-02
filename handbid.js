@@ -420,8 +420,19 @@
                 this.connectToAuction(this._auctionOnLoad.key, this._auctionOnLoad.options, this._auctionOnLoad.callback);
             }
 
+        },
+
+        deleteCreditCard: function (creditCardId, callback) {
+
+            this._socket.emit('delete-credit-card', {
+                id: creditCardId
+            }, function (err, results) {
+
+                callback(err, results);
+            });
 
         },
+
 
         /**
          * Pass an event from our socket through to anyone listening
