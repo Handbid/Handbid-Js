@@ -86,7 +86,7 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host            = 'http://handbid-js.local', //where am i hosted and available to the planet?
+        host            = 'https://beta-js.hand.bid', //where am i hosted and available to the planet?
         firebird        = 'https://beta-firebird.hand.bid:6789',   //where is the firebird and where do i connect to it
         connectEndpoint = 'https://beta-connect.hand.bid:8082',   //connect.handbid.com (where i send people to login/signup)
         cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
