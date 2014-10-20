@@ -2,10 +2,10 @@ var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
     //domain = 'https://beta.firebird.handbid.com',
-domain = 'http://orion.local',
+domain = 'http://50.152.46.150',//http://orion.local',
     endpoint = domain + ':6789',
 //    legacyDomain = 'http://beta.handbid.com',
-legacyDomain = 'http://orion.local',
+legacyDomain = 'http://50.152.46.150',//http://orion.local',
     hb,
     user = {
         firstName: 'Dummy',
@@ -436,7 +436,7 @@ describe('sdk', function () {
 
         });
 
-        it.only('should retrieve all auctions a user has participated in', function (done) {
+        it('should retrieve all auctions a user has participated in', function (done) {
             hb = new Handbid();
 
             hb.connect(clone(options));
@@ -455,6 +455,96 @@ describe('sdk', function () {
 
                         });
 
+
+                    });
+
+                });
+
+            });
+
+        });
+
+        it('should get tickets for auction', function (done) {
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+
+            hb.connectToAuction(auctionKey, function (err, auction) {
+
+                if (err) {
+                    done(err);
+                    return;
+                }
+
+                auction.tickets(function (err, tickets) {
+
+                    if(err) {
+                        done(err);
+                        return;
+                    }
+
+                    expect(tickets.length).to.be.above(0);
+                    done();
+
+                });
+
+            });
+
+            hb.on('error', onError(done));
+
+        });
+
+        it.only('should purchase a ticket', function (done) {
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+
+            hb.connectToAuction(auctionKey, function (err, auction) {
+
+
+                if (err) {
+                    done(err);
+                    return;
+                }
+
+                hb.login(email, password, function (err, user) {
+
+                    if (err) {
+                        done(err);
+                        return;
+                    }
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        if (err) {
+                            done (err);
+                            return;
+                        }
+
+                        auction.tickets(function (err, tickets) {
+
+                            if(err) {
+                                done(err);
+                                return;
+                            }
+
+                            expect(tickets.length).to.be.greaterThan(0);
+
+                            var ticketId = tickets[0]._id;
+
+                            auction.purchaseTicket(ticketId, 1, function (err, purchase) {
+
+                                if(err) {
+                                    done(err);
+                                    return;
+                                }
+
+                                expect(purchase).to.have.property('quantity').to.equal(1);
+
+                            });
+
+                        });
 
                     });
 

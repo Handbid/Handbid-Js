@@ -936,6 +936,39 @@
             });
         },
 
+        tickets: function (cb) {
+
+            this._socket.emit('tickets', function (err, tickets) {
+
+                if (err) {
+                    err = new Error(err);
+                }
+
+                cb(err,tickets);
+
+            });
+
+        },
+
+
+        purchaseTicket: function (ticketId, quantity, cb) {
+
+            this._socket.emit('purchase-ticket', {
+                ticketId: ticketId,
+                quantity:  quantity
+            }, function (err, purchases) {
+
+                if (err) {
+                    err = new Error(err);
+                }
+
+                cb(err, purchases);
+
+
+            });
+
+        },
+
         setAuth: function (authString, cb) {
 
             this._socket.emit('authenticate', authString, function (err, user) {
