@@ -86,13 +86,15 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host            = 'https://beta-js.hand.bid', //where am i hosted and available to the planet?
-        firebird        = 'https://beta-firebird.hand.bid:6789',   //where is the firebird and where do i connect to it
+        host            = 'http://handbid-js.local', //where am i hosted and available to the planet?
+        firebird        = 'http://localhost:6789',   //where is the firebird and where do i connect to it
         connectEndpoint = 'https://beta-connect.hand.bid:8082',   //connect.handbid.com (where i send people to login/signup)
         cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
         defaultOptions  = { //default options the Handbid client will receive on instantiation
             connectEndpoint: connectEndpoint, //where we point for connect.handbid
             url:             firebird, //where we connect by default
+            'force new connection': true,
+            reconnect:       false, //we handle reconnect attempts ourselves
             dependencies: isBrowser ? [
                 '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js',
                 host + '/lib/browser.js?cachebuster=' + cachebuster,
@@ -224,6 +226,8 @@
         authenticated:  false,
         connectEndpoint:null,
         authString:     '',
+        _reconnectTimeout: null,
+
         construct:      function (options) {
 
             var _options        = merge(defaultOptions, options || {});
@@ -315,6 +319,7 @@
                 //server socket listeners
                 this._socket.on('connect', this.onDidConnect.bind(this));
                 this._socket.on('error', this.onError.bind(this));
+                this._socket.on('disconnect', this.onDisconnect.bind(this));
                 this._socket.on('message', this._eventPassthrough.bind(this));
 
             }
@@ -327,6 +332,21 @@
             this._socket.connect(_options);
 
             return this._socket;
+
+        },
+
+        handleReconnect: function () {
+
+            if (this._reconnectTimeout) {
+                this._reconnectTimeout = clearTimeout(this._reconnectTimeout);
+            }
+
+            if(!this._socket || !this._socket.isConnected()) {
+                this._reconnectTimeout = setTimeout(this.connect.bind(this), 5000); //reconnect in 5 seconds
+            }
+
+            //all auctions connections need to be cleared so we can connect again
+            this.auctionsByKey = {};
 
         },
 
@@ -376,7 +396,19 @@
          */
         onError: function (e) {
             this.emit('error', e.data);
-//            this.error('handbid.js error', e.get('error'), this.options);
+            this.handleReconnect();
+        },
+
+        /**
+         * Pass through disconnect event.
+         *
+         * @param e
+         */
+        onDisconnect: function (e) {
+            //so we have an error object
+            e.set('error', new Error('disconnected'));
+            this.emit('disconnect', e.data);
+            this.handleReconnect();
         },
 
         /**
@@ -502,7 +534,9 @@
                     var __options = merge({
                         io: this._io,
                         Adapter: this._Adapter,
-                        Event: this.Event
+                        Event: this.Event,
+                        'force new connection': true,
+                        reconnect: false
                     } ,merge(_options, response)),
                         auction = new Auction(__options);
 
@@ -732,6 +766,7 @@
                 //auction socket listeners
                 this._socket.on('connect', this.onDidConnect.bind(this));
                 this._socket.on('error', this.onError.bind(this));
+                this._socket.on('disconnect', this.onDisconnect.bind(this));
 
                 if (_callback) {
                     this.on('did-connect', function (e) {
@@ -830,12 +865,54 @@
 
         },
 
-        onError: function (err) {
-            this.emit('error', err);
-            console.log('handbid.js auction error', err, this.options);
-            //this.error('server error', arguments);
+        /**
+         * An error occurred on the socket. Log it and pass it through
+         *
+         * @param err
+         */
+        onError: function (e) {
+            this.emit('error', e.data);
+            this.handleReconnect();
         },
 
+        /**
+         * Pass through disconnect event.
+         *
+         * @param e
+         */
+        onDisconnect: function (e) {
+            //so we have an error object
+            e.set('error', new Error('disconnected'));
+            this.emit('disconnect', e.data);
+            this.handleReconnect();
+        },
+
+        /**
+         * Reconnect after 5 seconds
+         */
+        handleReconnect: function () {
+
+            //special work needs to be done to make sure the auction server is running before we try and reconnect
+            //so for now the handbid class handles all reconnect attempts
+
+            //
+            //if (this._reconnectTimeout) {
+            //    this._reconnectTimeout = clearTimeout(this._reconnectTimeout);
+            //}
+            //
+            //if(!this._socket || !this._socket.isConnected()) {
+            //    this._reconnectTimeout = setTimeout(this.connect.bind(this), 5000); //reconnect in 5 seconds
+            //}
+
+        },
+
+        /**
+         * Get a value off the auction.
+         *
+         * @param name
+         * @param defaultValue
+         * @returns {*}
+         */
         get: function (name, defaultValue) {
             return this.values[name] || defaultValue;
         },
@@ -945,6 +1022,20 @@
                 }
 
                 cb(err,tickets);
+
+            });
+
+        },
+
+        stats: function (cb) {
+
+            this._socket.emit('stats', function (err, stats) {
+
+                if (err) {
+                    err = new Error(err);
+                }
+
+                cb(err, stats);
 
             });
 

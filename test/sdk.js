@@ -2,10 +2,10 @@ var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
     //domain = 'https://beta.firebird.handbid.com',
-domain = 'http://50.152.46.150',//http://orion.local',
+domain = 'http://localhost',//http://orion.local',
     endpoint = domain + ':6789',
 //    legacyDomain = 'http://beta.handbid.com',
-legacyDomain = 'http://50.152.46.150',//http://orion.local',
+legacyDomain = 'http://handbid.local',//http://orion.local',
     hb,
     user = {
         firstName: 'Dummy',
@@ -495,7 +495,8 @@ describe('sdk', function () {
 
         });
 
-        it.only('should purchase a ticket', function (done) {
+        it('should purchase a ticket', function (done) {
+
             hb = new Handbid();
 
             hb.connect(clone(options));
@@ -541,8 +542,57 @@ describe('sdk', function () {
                                 }
 
                                 expect(purchase).to.have.property('quantity').to.equal(1);
+                                done();
 
                             });
+
+                        });
+
+                    });
+
+                });
+
+            });
+
+        });
+
+        it.only('should get stats for bidder', function (done) {
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+
+            hb.connectToAuction(auctionKey, function (err, auction) {
+
+                if (err) {
+                    done(err);
+                    return;
+                }
+
+                hb.login(email, password, function (err, user) {
+
+                    if (err) {
+                        done(err);
+                        return;
+                    }
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        if (err) {
+                            done (err);
+                            return;
+                        }
+
+                        auction.stats(function (err, stats) {
+
+                            if(err) {
+                                done(err);
+                                return;
+                            }
+
+                            done();
+
+
 
                         });
 
