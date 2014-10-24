@@ -821,6 +821,17 @@
 
         },
 
+        buyItNow: function (itemKey, callback) {
+
+            this._socket.emit('buy-it-now', {
+                itemKey: itemKey
+            }, function (err, results) {
+
+                callback(err, results);
+            });
+
+        },
+
         bid: function (itemKey, amount, isProxy, callback) {
 
             this._socket.emit('bid', {

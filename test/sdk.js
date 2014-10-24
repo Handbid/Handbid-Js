@@ -2,10 +2,10 @@ var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
     //domain = 'https://beta.firebird.handbid.com',
-domain = 'http://localhost',//http://orion.local',
+    domain = 'http://taysmacbookpro.local',//http://orion.local',
     endpoint = domain + ':6789',
 //    legacyDomain = 'http://beta.handbid.com',
-legacyDomain = 'http://handbid.local',//http://orion.local',
+    legacyDomain = 'http://handbid.local',//http://orion.local',
     hb,
     user = {
         firstName: 'Dummy',
@@ -556,7 +556,7 @@ describe('sdk', function () {
 
         });
 
-        it.only('should get stats for bidder', function (done) {
+        it('should get stats for bidder', function (done) {
 
             hb = new Handbid();
 
@@ -591,6 +591,52 @@ describe('sdk', function () {
                             }
 
                             done();
+
+
+
+                        });
+
+                    });
+
+                });
+
+            });
+
+        });
+
+        it.only('should buy it now', function (done) {
+
+            hb = new Handbid();
+
+            hb.connect(clone(options));
+
+            hb.connectToAuction(auctionKey, function (err, auction) {
+
+                if (err) {
+                    done(err);
+                    return;
+                }
+
+                hb.login(email, password, function (err, user) {
+
+                    if (err) {
+                        done(err);
+                        return;
+                    }
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        if (err) {
+                            done(err);
+                            return;
+                        }
+
+                        auction.buyItNow(itemKey, function (err, bid) {
+
+                            if (err) {
+                                done(err);
+                                return;
+                            }
 
 
 
