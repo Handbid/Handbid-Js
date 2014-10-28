@@ -106,7 +106,8 @@
                 host + '/lib/bid.js?cachebuster=' + cachebuster,
                 host + '/lib/health.js?cachebuster=' + cachebuster,
                 host + '/lib/timer.js?cachebuster=' + cachebuster,
-                host + '/lib/stats.js?cachebuster=' + cachebuster
+                host + '/lib/stats.js?cachebuster=' + cachebuster,
+                host + '/lib/tickets.js?cachebuster=' + cachebuster
             ] : []
         };
 
