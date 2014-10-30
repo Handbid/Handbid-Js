@@ -1160,7 +1160,9 @@
             }
 
             if (!userId) {
-                cb(new Error('You must be logged in or pass a user id to add someone to an auction.'));
+                if(cb) {
+                    cb(new Error('You must be logged in or pass a user id to add someone to an auction.'));
+                }
                 return;
             }
 
@@ -1172,7 +1174,9 @@
                     err = new Error(err);
                 }
 
-                cb(err);
+                if(cb) {
+                    cb(err);
+                }
 
             });
 
