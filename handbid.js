@@ -87,8 +87,8 @@
         addScript = null,
         Class,
         host            = 'https://beta-js.hand.bid', //where am i hosted and available to the planet?
-        firebird        = 'https://beta-firebird.hand.bid:6789',   //where is the firebird and where do i connect to it
-        connectEndpoint = 'https://beta-connect.hand.bid:8082',   //connect.handbid.com (where i send people to login/signup)
+        firebird        = 'https://beta-firebird.hand.bid:6789',
+        connectEndpoint = 'http://beta-connect.hand.bid:8082',   //connect.handbid.com (where i send people to login/signup)
         cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
         defaultOptions  = { //default options the Handbid client will receive on instantiation
             connectEndpoint: connectEndpoint, //where we point for connect.handbid
@@ -591,6 +591,7 @@
 
                     this.authenticated  = true;
                     this.authString     = authString;
+                    this.user           = user;
 
                     //set auth on every auction
                     var i = 0,
@@ -733,6 +734,7 @@
         values:         null,
         authenticated:  false,
         authString:     '',
+        user:           null,
         construct: function (options) {
 
             this.options    = options;
@@ -746,6 +748,13 @@
 
         },
 
+        /**
+         * Connects to the auction server. You should never need to invoke this directly. Instead, use handbid.connectToAuction
+         *
+         * @param options
+         * @param callback
+         * @returns {null}
+         */
         connect: function (options, callback) {
 
             var _options,
@@ -823,6 +832,12 @@
 
         },
 
+        /**
+         * Buy any item by key
+         *
+         * @param itemKey
+         * @param callback
+         */
         buyItNow: function (itemKey, callback) {
 
             this._socket.emit('buy-it-now', {
@@ -834,6 +849,14 @@
 
         },
 
+        /**
+         * Bid on any item by key
+         *
+         * @param itemKey
+         * @param amount
+         * @param isProxy
+         * @param callback
+         */
         bid: function (itemKey, amount, isProxy, callback) {
 
             this._socket.emit('bid', {
@@ -847,6 +870,12 @@
 
         },
 
+        /**
+         * Delete a proxy bid by its id
+         *
+         * @param proxyBidId
+         * @param callback
+         */
         deleteProxyBid: function (proxyBidId, callback) {
 
             this._socket.emit('delete-proxy-bid', {
@@ -858,6 +887,11 @@
 
         },
 
+        /**
+         * Called internally anytime an auction is updated, mixes in changes, then fires true update events.
+         *
+         * @param e
+         */
         onDidUpdate: function (e) {
 
             var updates = e.get('changes');
@@ -906,7 +940,7 @@
         handleReconnect: function () {
 
             //special work needs to be done to make sure the auction server is running before we try and reconnect
-            //so for now the handbid class handles all reconnect attempts
+            //so for now the handbid class handles all reconnect attempts so it can resolve the proper auction endpoint
 
             //
             //if (this._reconnectTimeout) {
@@ -987,6 +1021,11 @@
 
         },
 
+        /**
+         * Force disconnect from this auction
+         *
+         * @param cb
+         */
         disconnect: function (cb) {
 
             if (this._socket) {
@@ -996,10 +1035,20 @@
             }
         },
 
+        /**
+         * Helps us tell if we are connected.
+         *
+         * @returns {null|*|boolean}
+         */
         isConnected: function () {
             return this._socket && this._socket.isConnected();
         },
 
+        /**
+         * Get all the items in this auction
+         *
+         * @param cb
+         */
         items: function (cb) {
 
             this._socket.emit('items', function (err, items) {
@@ -1013,6 +1062,12 @@
             });
         },
 
+        /**
+         * Get details on any item by id
+         *
+         * @param key
+         * @param cb
+         */
         item: function (key, cb) {
 
             this._socket.emit('item-by-key', key, function (err, item) {
@@ -1026,6 +1081,11 @@
             });
         },
 
+        /**
+         * Lists out all tickets
+         *
+         * @param cb
+         */
         tickets: function (cb) {
 
             this._socket.emit('tickets', function (err, tickets) {
@@ -1040,6 +1100,11 @@
 
         },
 
+        /**
+         * Gets you stats for this auction and the logged in user.
+         *
+         * @param cb
+         */
         stats: function (cb) {
 
             this._socket.emit('stats', function (err, stats) {
@@ -1054,7 +1119,13 @@
 
         },
 
-
+        /**
+         * Purchase a ticket by id
+         *
+         * @param ticketId
+         * @param quantity
+         * @param cb
+         */
         purchaseTicket: function (ticketId, quantity, cb) {
 
             this._socket.emit('purchase-ticket', {
@@ -1073,6 +1144,47 @@
 
         },
 
+
+        /**
+         * A user can join an auction here. If no user is set, the authenticated in user is assumed.
+         *
+         * @param userId
+         * @param cb
+         */
+        join: function (userId, cb) {
+
+
+            if (!cb) {
+                cb = userId;
+                userId = this.user._id || false;
+            }
+
+            if (!userId) {
+                cb(new Error('You must be logged in or pass a user id to add someone to an auction.'));
+                return;
+            }
+
+            this._socket.emit('join', {
+                userId: userId
+            }, function (err) {
+
+                if (err) {
+                    err = new Error(err);
+                }
+
+                cb(err);
+
+            });
+
+        },
+
+
+        /**
+         * Sets the auth string for this connection
+         *
+         * @param authString
+         * @param cb
+         */
         setAuth: function (authString, cb) {
 
             this._socket.emit('authenticate', authString, function (err, user) {
@@ -1081,12 +1193,14 @@
 
                     err = new Error(err);
 
+                    //no callback set, BAIL
                     if(!cb) {
                         console.error(err);
                         return;
                     }
 
                 } else {
+                    this.user          = user;
                     this.authString    = authString;
                     this.authenticated = true;
                 }
