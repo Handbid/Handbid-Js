@@ -4,7 +4,7 @@ var Handbid = require('../handbid'),
     //domain = 'https://beta.firebird.handbid.com',
     domain = 'http://taysmacbookpro.local',//http://orion.local',
     endpoint = domain + ':6789',
-    legacyDomain = 'http://beta.handbid.com',
+    legacyDomain = 'http://handbid.local',
 //    legacyDomain = 'http://handbid.local',//http://orion.local',
     hb,
     user = {
@@ -285,6 +285,43 @@ describe('sdk', function () {
                 });
 
             });
+
+        });
+
+        it.only('should get back profile details from auth', function (done) {
+
+
+            hb = new Handbid();
+            hb.connect(clone(options));
+            hb.connectToAuction(auctionKey);
+            hb.on('error', onError(done));
+
+            hb.on('did-connect-to-server', function (e) {
+
+                hb.login(email, password, function (error, user) {
+
+                    hb.setAuth(user.auth, function (err, user) {
+
+                        hb.profile(function (err, profile) {
+
+                            if (err) {
+
+                                done(err);
+
+                            } else {
+
+                                expect(profile.email).to.equal(email);
+                                done();
+                            }
+
+                        });
+
+                    });
+
+                });
+
+            });
+
 
         });
 
@@ -650,7 +687,7 @@ describe('sdk', function () {
 
         });
 
-        it.only('should add user to auction by user id', function (done) {
+        it('should add user to auction by user id', function (done) {
 
 
             hb = new Handbid();

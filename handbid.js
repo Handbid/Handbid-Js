@@ -86,9 +86,9 @@
         isBrowser = typeof window !== 'undefined',
         addScript = null,
         Class,
-        host            = 'https://beta-js.hand.bid', //where am i hosted and available to the planet?
-        firebird        = 'https://beta-firebird.hand.bid:6789',
-        connectEndpoint = 'http://beta-connect.hand.bid:8082',   //connect.handbid.com (where i send people to login/signup)
+        host            = 'http://handbid-js.local', //where am i hosted and available to the planet?
+        firebird        = 'http://localhost:6789',
+        connectEndpoint = 'http://localhost:8080',   //connect.handbid.com (where i send people to login/signup)
         cachebuster     = 123456789, //for cdn and caching (randomized by the "cache buster buster buster" on push)
         defaultOptions  = { //default options the Handbid client will receive on instantiation
             connectEndpoint: connectEndpoint, //where we point for connect.handbid
@@ -244,8 +244,8 @@
             this.options        = _options;
 
             //default values
-            this.auctions = [];
-            this.auctionsByKey = {};
+            this.auctions       = [];
+            this.auctionsByKey  = {};
 
             this.inherited();
 
@@ -702,6 +702,35 @@
                 }
 
                 cb(err, user);
+
+            });
+
+        },
+
+        /**
+         * Get the profile for the logged in user (or the userId of the user, but the userId does not work yet).
+         *
+         * @param userId
+         * @param callback
+         */
+        profile: function (userId, cb) {
+
+            //user id
+            if(!cb) {
+                cb          = userId;
+                userId      = null;
+            }
+
+            this._socket.emit('profile', {
+                userId: userId
+            }, function (err, profile) {
+
+                if (err) {
+                   err = new Error(err);
+                }
+
+                cb(err, profile);
+
 
             });
 
