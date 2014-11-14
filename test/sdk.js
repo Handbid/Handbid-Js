@@ -1,10 +1,10 @@
 var Handbid = require('../handbid'),
     expect = require('chai').expect,
     request = require('request'),
-    //domain = 'https://beta.firebird.handbid.com',
-    domain = 'http://taysmacbookpro.local',//http://orion.local',
+    domain = 'https://beta-firebird.hand.bid',
+    //domain = 'http://taysmacbookpro.local',//http://orion.local',
     endpoint = domain + ':6789',
-    legacyDomain = 'http://handbid.local',
+    legacyDomain = 'http://beta.handbid.com',
 //    legacyDomain = 'http://handbid.local',//http://orion.local',
     hb,
     user = {
@@ -157,6 +157,7 @@ describe('sdk', function () {
 
             });
 
+
         });
 
         it('should connect to auction and get item prices', function (done) {
@@ -171,7 +172,7 @@ describe('sdk', function () {
 
                 var auction = e.get('auction');
 
-                auction.refreshItemPrices('*', function (prices) {
+                auction.refreshItemPrices('*', function (err, prices) {
 
                     expect(Object.keys(prices).length).to.be.above(0);
                     done();
@@ -288,7 +289,7 @@ describe('sdk', function () {
 
         });
 
-        it.only('should get back profile details from auth', function (done) {
+        it('should get back profile details from auth', function (done) {
 
 
             hb = new Handbid();

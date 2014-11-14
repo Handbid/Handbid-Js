@@ -1000,12 +1000,12 @@
          */
         refresh: function (cb) {
 
-            this._socket.emit('auction', null, function (values) {
+            this._socket.emit('auction', null, function (err, values) {
 
                 this.values = values;
 
                 if (cb) {
-                    cb(this);
+                    cb(null, this);
                 }
 
             }.bind(this));
@@ -1016,7 +1016,7 @@
          */
         onDidConnect: function () {
 
-            this.refresh(function (auction) {
+            this.refresh(function (err, auction) {
 
                 this.emit('did-connect', {
                     auction: this,
@@ -1046,7 +1046,15 @@
 
             this._socket.emit('item-prices', {
                 keys: itemKeys
-            }, cb);
+            }, function (err, prices) {
+
+                if (err) {
+                    err = new Error(err);
+                }
+
+                cb(err, prices);
+
+            });
 
         },
 
